@@ -67,11 +67,13 @@ IF `order.completed` exit with error `Order has already been completed!`
 IF `t >= order.a_end && order.fill_request.filler != null` Fill the order and swap assets, set `order.completed` to true.
 
 // Backstop Phase Fill
-IF `filler != null && t >= order.a_end && order.fill_request.filler == null && t < order.b_end` Attempt to fill the order with the filler 
+ELSE IF `filler != null && t >= order.a_end && order.fill_request.filler == null && t < order.b_end` Attempt to fill the order with the filler 
 accounts funds. If filled, set `order.completed` to true.
 
 // Order Expiry
-IF `!filled && t >= order.a_end && t >= order.b_end` Set `order.completed` to true.
+ELSE IF `!filled && t >= order.a_end && t >= order.b_end` Set `order.completed` to true.
+
+IF `order.completed` Remove order from the CritBit queue
 
 ELSE OK.
 ```
