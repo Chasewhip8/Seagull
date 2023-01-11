@@ -6,16 +6,7 @@ CLOB(Central Limit Order Book).
 
 ## Design Outline
 The following sections will reference the following placeholder values for explanation.
-
  - `t` Current Time
-
-Market Account
- - `quote_mint` Mint of Quote Asset
- - `base_mint` Mint of Base Asset
- - `a_max_t` Maximum Auction Duration Time
- - `a_min_t` Minimum Auction Duration Time
- - `b_max_t` Maximum Backstop Duration Time
- - `b_min_t` Minimum Backstop Duration Time
 
 #### Auction Phases
  - `Auction Ongoing` Auction Mechanism (detailed below)
@@ -24,40 +15,28 @@ Market Account
 
 ### Auction Mechanism
 #### Place Auction Order
-The user places the order on-chain with the following attributes defined in the order. Each order belongs to a pre-specified
-market where assets are already well-defined.
-- `size` Position Size
-- `asset_account` Account holding asset for order.
-- `side` Position Side (Buy or Sell)
-- `a_end` Auction End Time `t + (a_min_t < duration < a_max_t)`
-- `b_end` Backstop End Time `t + (b_min_t < duration < b_max_t)`
-- `expected_return` Minimum Return (in base or quote asset atoms depending on side)
-- `fill_request` Fill Request, null if none
-- `completed` Boolean controlled by program weather order is completed via expiry or fill. Filled if asset_account.balance == 0, expired if not.
+The user can place an [order](state.md#Order) on a [market](state.md#Market).
 
 This order is then placed in a CritBit order queue. Note that we might want to try and sort the collection by duration left, maybe 
 instead of a fixed time we use the slot when the auction ends, which would require changing the above structure of the order as well.
 
 #### Auction Fill Request
-This action is done on a specific **Auction Order** placed above. Auction Fill Requests cannot be cancelled until a better request
+This action is done on a specific [order](state.md#Order) placed above. Auction Fill Requests cannot be cancelled until a better request
 overtakes it by providing a better price. 
 
-A `Filler Account` needs to be created by the auction filler which will hold the funds and lock all outstanding fill requests funds inside.
+A [Filler](state.md#Filler) needs to be created by the auction filler which will hold the funds and lock all outstanding fill requests funds inside.
 This way we are not moving assets back and forth between accounts and the auctions should be less computationally intensive on the network.
 
-Makers will place the following on chain Auction Fill Request with the following attributes.
- - `order` Auction Order that is in 
- - `filler` **Filler Account** with enough funds to fill the order
-
-This fill request will be assigned to the orders `fill_request` if it is better than the existing request. Orders can only be appended when
+This [fill request](state.md#Fill Request) will be assigned to the orders `fill_request` if it is better than the existing request. Orders can only be appended when
 time is less than the auction end.
 
 #### Order Crank and Fill
 A keeper instruction needs to be in place to advance the order, this is a permission-less instruction and will do the following in 
 specific scenarios.
 
-Optional `filler` **Filler Account** with enough funds to fill the order in case of backstop phase entry.
-Order is defined as `order`. Execute top down.
+Optional `filler` [Filler](state.md#Filler) with enough funds to fill the order in case of backstop phase entry.
+[Order](state.md#Order) is defined as `order`. 
+Execute top down.
 
 ```
 // Auction Filled Already
