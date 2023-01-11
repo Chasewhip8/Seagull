@@ -34,7 +34,7 @@ time is less than the auction end.
 A keeper instruction needs to be in place to advance the order, this is a permission-less instruction and will do the following in 
 specific scenarios.
 
-Optional `filler` [Filler](state.md#Filler) with enough funds to fill the order in case of backstop phase entry.
+Optional [Filler](state.md#Filler) with enough funds to fill the order in case of backstop phase entry.
 [Order](state.md#Order) is defined as `order`. 
 Execute top down.
 
