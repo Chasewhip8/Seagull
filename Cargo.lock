@@ -1075,6 +1075,8 @@ name = "seagull"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "arrayref",
+ "borsh",
 ]
 
 [[package]]
