@@ -1,13 +1,6 @@
 # Enums
 **Side** - `BUY, SELL`
 
-
-* [PDA Layouts](#pda-layouts)
-  * [Market](#market)
-  * [Order](#order)
-  * [Filler](#filler)
-  * [Fill Request](#fill-request)
-
 # PDA Layouts
 ## Market
 Account to hold information about the underlying market. 
