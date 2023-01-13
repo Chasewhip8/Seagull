@@ -20,7 +20,8 @@ pub struct Order {
 
 impl Order {
     pub const LEN: usize =
-        8    // size: u64
+        8  // Anchor Account Discriminator
+            + 8  // size: u64
             + 1  // side: Side
             + 8  // expected_return: u64
             + 32 // holding_account: Pubkey

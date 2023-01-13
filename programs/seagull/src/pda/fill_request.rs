@@ -10,7 +10,8 @@ pub struct FillRequest {
 
 impl FillRequest {
     pub const LEN: usize =
-        32   // order: Pubkey,
+        8  // Anchor Account Discriminator
+            + 32 // order: Pubkey,
             + 32 // filler: Pubkey,
             + 8  // price: f64
     ;

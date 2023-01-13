@@ -1,7 +1,9 @@
-use anchor_lang::prelude::*;
-
 mod pda;
 mod instructions;
+mod constants;
+
+use anchor_lang::prelude::*;
+use instructions::*;
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
@@ -9,10 +11,10 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod seagull {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        Ok(())
+    #[access_control(ctx.accounts.validate())]
+    pub fn new_transaction(
+        ctx: Context<InitMarket>
+    ) -> Result<()> {
+        ctx.accounts.handle()
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}

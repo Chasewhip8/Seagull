@@ -5,14 +5,11 @@
 ## Market
 Account to hold information about the underlying market. 
 
-| Name         | Type   | Description                     |
-|--------------|--------|---------------------------------|
-| `quote_mint` | Pubkey | Mint of Quote Asset             |
-| `base_mint`  | Pubkey | Mint of Base Asset              |
-| `a_max_t`    | u32    | Maximum Auction Duration Slots  |
-| `a_min_t`    | u32    | Minimum Auction Duration Slots  |
-| `b_max_t`    | u32    | Maximum Backstop Duration Slots |
-| `b_min_t`    | u32    | Minimum Backstop Duration Slots |
+| Name          | Type   | Description                   |
+|---------------|--------|-------------------------------|
+| `quote_mint`  | Pubkey | Mint of Quote Asset           |
+| `base_mint`   | Pubkey | Mint of Base Asset            |
+| `order_queue` | Pubkey | Pubkey of CritBit order queue |
 
 ## Order
 
@@ -21,8 +18,8 @@ Account to hold information about the underlying market.
 | `size`            | u64    | Position Size                                                     |
 | `holding_account` | Pubkey | ATA for holding asset for order                                   |
 | `side`            | Side   | Position Side (Buy or Sell)                                       |
-| `a_end`           | Slot   | Auction End Time `t + (a_min_t < duration < a_max_t)`             |
-| `b_end`           | Slot   | Backstop End Time `t + (b_min_t < duration < b_max_t)`            |
+| `a_end`           | Slot   | Auction End Time `t + (A_MIN_T < duration < A_MAX_T)`             |
+| `b_end`           | Slot   | Backstop End Time `t + (B_MIN_T < duration < B_MAX_T)`            |
 | `expected_return` | u64    | Minimum Return (in base or quote asset atoms depending on side)   |
 | `fill_request`    | Pubkey | Fill Request, null if none                                        |
 | `completed`       | bool   | Weather or not the order is completed, weather expired or filled. |

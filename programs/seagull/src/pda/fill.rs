@@ -14,10 +14,11 @@ pub struct Filler {
 
 impl Filler {
     pub const LEN: usize =
-        32   // base_account: Pubkey
-        + 8  // base_locked: u64
-        + 32 // quote_account: Pubkey
-        + 8  // quote_locked: u64
+        8  // Anchor Account Discriminator
+            + 32 // base_account: Pubkey
+            + 8  // base_locked: u64
+            + 32 // quote_account: Pubkey
+            + 8  // quote_locked: u64
     ;
 
     pub fn seeds<'a>(owner: &'a Pubkey, market: &'a Pubkey) -> Vec<&'a[u8]> {
