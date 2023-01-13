@@ -46,6 +46,10 @@ impl<'info> InitMarket<'info> {
     }
 
     pub fn handle(&mut self) -> Result<()> {
+        let market = &mut self.market;
+        market.quote_mint = self.quote_mint.key();
+        market.base_mint = self.base_mint.key();
+        market.order_queue = self.order_queue.key();
         Ok(())
     }
 }
