@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock::Slot;
-use crate::constants::PADDING;
 use crate::pda::Market;
 use crate::pda::Side::BUY;
 
@@ -19,20 +18,20 @@ pub struct Order {
     pub completed: bool
 }
 
-impl Market {
-    pub const LEN: usize = PADDING
-        + 8  // size: u64
-        + 1  // side: Side
-        + 8  // expected_return: u64
-        + 32 // holding_account: Pubkey
-        + 8  // a_end: Slot
-        + 8  // b_end: Slot
-        + 32 + 4 // Option<Pubkey> TODO verify option takes extra 4 bytes
-        + 1  // completed: bool
+impl Order {
+    pub const LEN: usize =
+        8    // size: u64
+            + 1  // side: Side
+            + 8  // expected_return: u64
+            + 32 // holding_account: Pubkey
+            + 8  // a_end: Slot
+            + 8  // b_end: Slot
+            + 33 // Option<Pubkey> TODO verify option takes extra 4 bytes
+            + 1  // completed: bool
     ;
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
+#[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone)]
 pub enum Side {
     BUY,
     SELL

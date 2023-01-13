@@ -17,5 +17,3 @@ default = []
 
 [dependencies]
 anchor-lang = "0.26.0"
-arrayref = "0.3.6"
-borsh = "0.9.3"

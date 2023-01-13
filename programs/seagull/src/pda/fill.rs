@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use crate::constants::PADDING;
 
 #[account]
 #[derive(Default, Debug)]
@@ -14,8 +13,8 @@ pub struct Filler {
 }
 
 impl Filler {
-    pub const LEN: usize = PADDING
-        + 32 // base_account: Pubkey
+    pub const LEN: usize =
+        32   // base_account: Pubkey
         + 8  // base_locked: u64
         + 32 // quote_account: Pubkey
         + 8  // quote_locked: u64
@@ -32,20 +31,4 @@ impl Filler {
             program_id,
         )
     }
-}
-
-#[account]
-#[derive(Default, Debug)]
-pub struct FillRequest {
-    pub order: Pubkey,
-    pub filler: Pubkey,
-    pub price: f64
-}
-
-impl FillRequest {
-    pub const LEN: usize = PADDING
-        + 32 // order: Pubkey,
-        + 32 // filler: Pubkey,
-        + 8  // price: f64
-    ;
 }

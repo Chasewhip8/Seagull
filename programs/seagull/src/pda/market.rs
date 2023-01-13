@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use crate::constants::PADDING;
 
 #[account]
 #[derive(Default, Debug)]
@@ -15,13 +14,13 @@ pub struct Market {
 }
 
 impl Market {
-    pub const LEN: usize = PADDING
-        + 32 // quote_mint: Pubkey
-        + 32 // base_mint: Pubkey
-        + 4  // a_max_t: u32
-        + 4  // a_min_t: u32
-        + 4  // b_max_t: u32
-        + 4  // b_min_t: u32
+    pub const LEN: usize =
+        32   // quote_mint: Pubkey
+            + 32 // base_mint: Pubkey
+            + 4  // a_max_t: u32
+            + 4  // a_min_t: u32
+            + 4  // b_max_t: u32
+            + 4  // b_min_t: u32
     ;
 
     // TODO I think we should just pass in an empty keypair instead of deriving it
