@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use crate::pda::Market;
+use crate::pda::{Market, OrderQueue};
 
 #[derive(Accounts)]
 pub struct InitMarket<'info> {
@@ -35,13 +35,16 @@ pub struct InitMarket<'info> {
         ],
         bump
     )]
-    order_queue: Box<Account<'info, Mint>>, // TODO change to critbit account type and set space
+    order_queue: AccountLoader<'info, OrderQueue>, // TODO set space
 
     system_program: Program<'info, System>
 }
 
 impl<'info> InitMarket<'info> {
     pub fn validate(&self) -> Result<()> {
+        // TODO check if additional validation is needed.
+        assert_ne!(self.quote_mint.key(), self.base_mint.key(), "Market assets need to be different!");
+
         Ok(())
     }
 

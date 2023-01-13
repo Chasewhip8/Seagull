@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use sokoban::{Critbit};
 
 #[account]
 #[derive(Default, Debug)]
@@ -7,6 +8,12 @@ pub struct Market {
     pub base_mint: Pubkey,
 
     pub order_queue: Pubkey // Pubkey of CritBit order queue
+}
+
+#[account(zero_copy)]
+#[repr(packed)] // TODO maybe remove this might not be needed? maybe #[repr(transparent)]
+pub struct OrderQueue {
+    pub queue: Critbit<Pubkey, 10, 10>
 }
 
 impl Market {
