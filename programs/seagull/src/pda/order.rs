@@ -31,7 +31,8 @@ impl Order {
     ;
 }
 
-#[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone)]
+#[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone, Copy)]
+#[repr(u8)]
 pub enum Side {
     BUY,
     SELL

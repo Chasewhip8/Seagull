@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
+use sokoban::Critbit;
 use crate::pda::{Market, OrderQueue};
 
 #[derive(Accounts)]
@@ -25,9 +26,7 @@ pub struct InitMarket<'info> {
     market: Box<Account<'info, Market>>,
 
     #[account(
-        init,
-        payer = payer,
-        space = 2,
+        zero, // Initialize the account later as we do not know the size of the Critbit tree right now.
         seeds = [
             b"OrderQueue".as_ref(),
             &quote_mint.key().as_ref(),
@@ -53,6 +52,9 @@ impl<'info> InitMarket<'info> {
         market.quote_mint = self.quote_mint.key();
         market.base_mint = self.base_mint.key();
         market.order_queue = self.order_queue.key();
+
+        self.order_queue.load_mut()?.queue = Critbit::new();
+
         Ok(())
     }
 }
