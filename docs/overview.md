@@ -4,6 +4,8 @@ to properly hedge the other leg of the order on a more efficient, better priced,
 in tighter spreads to be achieved as the counterpart does not need to maintain a hedge constantly like on a 
 CLOB(Central Limit Order Book).
 
+![JIT Market Diagram](assets/diagram.png)
+
 ## Design Outline
 The following sections will reference the following placeholder values for explanation.
  - `t` Current Time
