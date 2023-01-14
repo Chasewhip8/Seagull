@@ -26,13 +26,13 @@ Account to hold information about the underlying market.
 
 ## Filler
 
-| Name            | Type   | Description                                                                 |
-|-----------------|--------|-----------------------------------------------------------------------------|
-| `owner`         | Pubkey | The user who is the filler                                                  |
-| `base_account`  | Pubkey | A token account to hold funds used to fill orders                           |
-| `base_locked`   | u64    | The amount of base funds locked in outstanding, unprocessed, fill requests  |
+| Name           | Type   | Description                                                                 |
+|----------------|--------|-----------------------------------------------------------------------------|
+| `authroity`    | Pubkey | The user who is the filler                                                  |
+| `base_account` | Pubkey | A token account to hold funds used to fill orders                           |
+| `base_locked`  | u64    | The amount of base funds locked in outstanding, unprocessed, fill requests  |
 | `quote_account` | Pubkey | A token account to hold funds used to fill orders                           |
-| `quote_locked`  | u64    | The amount of quote funds locked in outstanding, unprocessed, fill requests |
+| `quote_locked` | u64    | The amount of quote funds locked in outstanding, unprocessed, fill requests |
 
 ## Fill Request
 

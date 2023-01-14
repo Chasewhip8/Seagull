@@ -1,7 +1,8 @@
-use std::intrinsics::size_of;
 use anchor_lang::prelude::*;
 use bytemuck::{Pod, Zeroable};
-use sokoban::{Critbit, FromSlice};
+
+use sokoban::{Critbit};
+
 use crate::constants::{CRITBIT_NUM_NODES, MAX_ORDERS};
 use crate::pda::Side;
 
@@ -23,8 +24,10 @@ pub struct OrderQueue {
 #[derive(Default, Copy, Clone)]
 #[repr(packed)]
 pub struct OrderInfo {
+    pub price: u64,
     pub size: u64,
-    pub side: Side
+    pub side: Side,
+    pub order: Pubkey // This type might not serialize or whatever fallback to [u64; 4]??
 }
 unsafe impl Zeroable for OrderInfo {}
 unsafe impl Pod for OrderInfo {}
