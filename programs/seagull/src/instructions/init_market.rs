@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
+use anchor_spl::token::{Mint, Token, TokenAccount};
 
 use sokoban::Critbit;
 
@@ -11,21 +11,25 @@ pub struct InitMarket<'info> {
     #[account(mut)]
     payer: Signer<'info>,
 
-    // The mints of the market
     quote_mint: Box<Account<'info, Mint>>,
+
+    #[account(
+        init,
+        payer = payer,
+        token::mint = quote_mint,
+        token::authority = market
+    )]
+    quote_holding_account: Box<Account<'info, TokenAccount>>,
+
     base_mint: Box<Account<'info, Mint>>,
 
     #[account(
         init,
         payer = payer,
-        space = Market::LEN,
-        seeds = [
-            &quote_mint.key().as_ref(),
-            &base_mint.key().as_ref()
-        ],
-        bump
+        token::mint = base_mint,
+        token::authority = market
     )]
-    market: Box<Account<'info, Market>>,
+    base_holding_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init,
@@ -40,7 +44,20 @@ pub struct InitMarket<'info> {
     )]
     order_queue: AccountLoader<'info, OrderQueue>,
 
-    system_program: Program<'info, System>
+    #[account(
+        init,
+        payer = payer,
+        space = Market::LEN,
+        seeds = [
+            &quote_mint.key().as_ref(),
+            &base_mint.key().as_ref()
+        ],
+        bump
+    )]
+    market: Box<Account<'info, Market>>,
+
+    system_program: Program<'info, System>,
+    token_program: Program<'info, Token>
 }
 
 impl<'info> InitMarket<'info> {
@@ -54,7 +71,9 @@ impl<'info> InitMarket<'info> {
     pub fn handle(&mut self) -> Result<()> {
         let market = &mut self.market;
         market.quote_mint = self.quote_mint.key();
+        market.quote_holding_account = self.quote_holding_account.key();
         market.base_mint = self.base_mint.key();
+        market.base_holding_account = self.base_holding_account.key();
         market.order_queue = self.order_queue.key();
 
         self.order_queue.load_mut()?.queue = Critbit::new();

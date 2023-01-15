@@ -35,6 +35,7 @@ pub struct InitFiller<'info> {
         space = Filler::LEN,
         seeds = [
             b"Filler".as_ref(),
+            authority.key().as_ref(),
             market.key().as_ref()
         ],
         bump
@@ -55,6 +56,8 @@ impl<'info> InitFiller<'info> {
 
     pub fn handle(&mut self) -> Result<()> {
         let filler = &mut self.filler;
+        filler.authority = self.authority.key();
+        filler.market = self.market.key();
         filler.quote_account = self.quote_mint.key();
         filler.quote_locked = 0;
         filler.base_account = self.base_account.key();
