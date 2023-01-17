@@ -10,8 +10,8 @@ pub struct InitFiller<'info> {
     authority: Signer<'info>,
 
     market: Box<Account<'info, Market>>,
+
     quote_mint: Box<Account<'info, Mint>>,
-    base_mint: Box<Account<'info, Mint>>,
 
     #[account(
         init,
@@ -21,10 +21,12 @@ pub struct InitFiller<'info> {
     )]
     quote_account: Box<Account<'info, TokenAccount>>,
 
+    base_mint: Box<Account<'info, Mint>>,
+
     #[account(
         init,
         payer = authority,
-        token::mint = quote_mint,
+        token::mint = base_mint,
         token::authority = market
     )]
     base_account: Box<Account<'info, TokenAccount>>,

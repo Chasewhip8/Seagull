@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 
 use instructions::*;
-use anchor_lang::solana_program::clock::Slot;
 
 use pda::market::Side;
 
@@ -36,8 +35,8 @@ pub mod seagull {
         size: u64,
         side: Side,
         expected_return: u64,
-        a_end: Slot,
-        b_end: Slot
+        a_end: u64,
+        b_end: u64
     ) -> Result<()> {
         ctx.accounts.handle(size, side, expected_return, a_end, b_end)
     }

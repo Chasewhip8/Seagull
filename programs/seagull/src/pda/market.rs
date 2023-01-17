@@ -1,3 +1,4 @@
+use std::mem;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock::Slot;
 use bytemuck::{Pod, Zeroable};
@@ -41,10 +42,13 @@ impl Market {
 }
 
 #[account(zero_copy)]
-#[repr(transparent)] // TODO maybe remove this might not be needed? maybe #[repr(transparent)]
+#[repr(transparent)]
 pub struct OrderQueue {
-    pub queue: Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>
+    pub queue: [u8; 91184]
 }
+const _: [u8; mem::size_of::<OrderQueue>()] = [0; OrderQueue::LEN - 8];
+
+pub type OrderQueueCritbit = Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>;
 
 #[derive(Default, Copy, Clone)]
 #[repr(packed)]

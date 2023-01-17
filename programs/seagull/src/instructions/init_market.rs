@@ -1,3 +1,4 @@
+use std::io::Read;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
@@ -76,7 +77,7 @@ impl<'info> InitMarket<'info> {
         market.base_holding_account = self.base_holding_account.key();
         market.order_queue = self.order_queue.key();
 
-        self.order_queue.load_mut()?.queue = Critbit::new();
+        // self.order_queue.load_mut()?;
 
         Ok(())
     }
