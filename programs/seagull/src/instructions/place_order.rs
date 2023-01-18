@@ -8,7 +8,7 @@ use crate::error::SeagullError;
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
-#[instruction(user_id: u64, size: u64, side: Side, expected_return: u64, a_end: u64, b_end: u64)]
+#[instruction(user_id: u64, size: u64, side: Side, lowest_price: u64, a_end: u64, b_end: u64)]
 pub struct PlaceOrder<'info> {
     #[account(mut)]
     authority: Signer<'info>,
@@ -28,7 +28,7 @@ pub struct PlaceOrder<'info> {
 }
 
 impl<'info> PlaceOrder<'info> {
-    pub fn validate(&self, size: u64, expected_return: u64, a_end: u64, b_end: u64) -> Result<()> {
+    pub fn validate(&self, size: u64, lowest_price: u64, a_end: u64, b_end: u64) -> Result<()> {
         // Validation of the user account is done through seeds requiring the authority key to derive
         // their filler.
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
@@ -38,7 +38,7 @@ impl<'info> PlaceOrder<'info> {
         assert_eq!(self.market.key(), self.user.market.key());
 
         assert_ne!(size, 0); // Orders cannot be 0.
-        assert_ne!(expected_return, 0); // Make sure they get something back
+        assert_ne!(lowest_price, 0); // Make sure they get something back
 
         assert!(b_end >= a_end, "Backstop end needs to be greater than or equal to auction end");
 
@@ -54,12 +54,14 @@ impl<'info> PlaceOrder<'info> {
         Ok(())
     }
 
-    pub fn handle(&mut self, size: u64, side: Side, expected_return: u64, a_end: u64, b_end: u64) -> Result<()> {
-        let order = OrderInfo::from(size, side, expected_return, a_end, b_end);
-
+    pub fn handle(&mut self, size: u64, side: Side, lowest_price: u64, a_end: u64, b_end: u64) -> Result<()> {
         let buf = &mut self.order_queue.load_mut()?.queue;
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
-        let insert_node = order_queue.insert(order.get_key(), order);
+
+        let order = OrderInfo::from(size, side, a_end, b_end);
+        let order_key = OrderInfo::get_key(lowest_price, self.user.user_id);
+
+        let insert_node = order_queue.insert(order_key, order);
         if insert_node.is_none() {
             return Err(error!(SeagullError::OrderQueueFull));
         }

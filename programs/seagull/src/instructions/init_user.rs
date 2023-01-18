@@ -39,20 +39,23 @@ pub struct InitUser<'info> {
 }
 
 impl<'info> InitUser<'info> {
-    pub fn validate(&self) -> Result<()> {
+    pub fn validate(&self, user_id: u64) -> Result<()> {
+        // Implied Validation: The order_id is unused as anchor would throw an error initializing and already
+        //                     initialized account.
+        assert!(user_id > 0); // 0 is empty in the filler struct
+
         assert_eq!(self.market.base_mint.key(), self.base_mint.key());
         assert_eq!(self.market.quote_mint.key(), self.quote_mint.key());
 
         Ok(())
     }
 
-    pub fn handle(&mut self) -> Result<()> {
+    pub fn handle(&mut self, user_id: u64) -> Result<()> {
         let user = &mut self.user;
         user.authority = self.authority.key();
         user.market = self.market.key();
-        user.quote_account = self.quote_mint.key();
+        user.user_id = user_id;
         user.quote_locked = 0;
-        user.base_account = self.base_account.key();
         user.base_locked = 0;
         Ok(())
     }

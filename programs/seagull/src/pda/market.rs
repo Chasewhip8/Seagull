@@ -39,43 +39,52 @@ impl Market {
 #[account(zero_copy)]
 #[repr(transparent)]
 pub struct OrderQueue {
-    pub queue: [u8; 8592]
+    pub queue: [u8; 9520]
 }
-const _: [u8; mem::size_of::<OrderQueue>()] = [0; OrderQueue::LEN];
+
+impl OrderQueue {
+    pub const LEN: usize = mem::size_of::<OrderQueueCritbit>();
+
+    // Workaround for Anchor Bug preventing us from putting the LEN inside of the array causing idl type parse errors.
+    const _LEN_CHECK: [u8; OrderQueue::LEN] = [0; mem::size_of::<OrderQueue>()];
+}
 
 pub type OrderQueueCritbit = Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>;
 
 #[derive(Default, Copy, Clone)]
 #[repr(packed)]
 pub struct OrderInfo {
-    pub size: bool,
-    pub side: Side,
-    pub expected_return: u64,
+    //pub user: u64, First 64 bits of t
 
+    pub size: u64,
+    pub side: Side,
     pub a_end: Slot,
     pub b_end: Slot,
 
-    pub filler: Option<Pubkey>,
+    pub filler_id: u64,
 }
 unsafe impl Zeroable for OrderInfo {}
 unsafe impl Pod for OrderInfo {}
 
 impl OrderInfo {
-    pub fn from(size: u64, side: Side, expected_return: u64, a_end: Slot, b_end: Slot) -> OrderInfo {
+    pub fn from(size: u64, side: Side, a_end: Slot, b_end: Slot) -> OrderInfo {
         OrderInfo {
-            size, side, expected_return, a_end, b_end,
-            filler: None
+            size, side, a_end, b_end,
+            filler_id: 0
         }
     }
 
-    pub fn get_key(&self) -> u128 {
-
+    pub fn get_key(price: u64, user_id: u64) -> u128 {
+        ((price as u128) << 64) | (user_id as u128) // Upper bits: price, Lower bits: user_id
     }
-}
 
-impl OrderQueue {
-    pub const LEN: usize = 8592;
-    const _LEN_CHECK: [u8; OrderQueue::LEN] = [0; mem::size_of::<OrderQueue>()];
+    pub fn get_price_from_key(key: u128) -> u64 {
+        (key >> 64) as u64
+    }
+
+    pub fn get_user_id_from_key(key: u128) -> u64 {
+        key as u64
+    }
 }
 
 #[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone, Copy)]

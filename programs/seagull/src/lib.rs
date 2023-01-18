@@ -22,22 +22,23 @@ pub mod seagull {
         ctx.accounts.handle()
     }
 
-    #[access_control(ctx.accounts.validate())]
+    #[access_control(ctx.accounts.validate(user_id))]
     pub fn init_filler(
-        ctx: Context<InitUser>
+        ctx: Context<InitUser>,
+        user_id: u64
     ) -> Result<()> {
-        ctx.accounts.handle()
+        ctx.accounts.handle(user_id)
     }
 
-    #[access_control(ctx.accounts.validate(size, expected_return, a_end, b_end))]
+    #[access_control(ctx.accounts.validate(size, lowest_price, a_end, b_end))]
     pub fn place_order(
         ctx: Context<PlaceOrder>,
         size: u64,
         side: Side,
-        expected_return: u64,
+        lowest_price: u64,
         a_end: u64,
         b_end: u64
     ) -> Result<()> {
-        ctx.accounts.handle(size, side, expected_return, a_end, b_end)
+        ctx.accounts.handle(size, side, lowest_price, a_end, b_end)
     }
 }

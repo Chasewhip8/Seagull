@@ -60,7 +60,6 @@ pub struct InitMarket<'info> {
 
 impl<'info> InitMarket<'info> {
     pub fn validate(&self) -> Result<()> {
-        // TODO check if additional validation is needed.
         assert_ne!(self.quote_mint.key(), self.base_mint.key(), "Market assets need to be different!");
 
         Ok(())
