@@ -3,15 +3,18 @@ use anchor_spl::token::{Token};
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
 use crate::constants::{A_MAX_T, A_MIN_T, B_MAX_T, B_MIN_T};
 
-use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit};
+use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, User};
 use crate::error::SeagullError;
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
-#[instruction(size: u64, side: Side, expected_return: u64, a_end: u64, b_end: u64)]
+#[instruction(user_id: u64, size: u64, side: Side, expected_return: u64, a_end: u64, b_end: u64)]
 pub struct PlaceOrder<'info> {
     #[account(mut)]
     authority: Signer<'info>,
+
+    #[account(mut)]
+    user: Box<Account<'info, User>>,
 
     #[account(mut)]
     market: Box<Account<'info, Market>>,
@@ -26,9 +29,13 @@ pub struct PlaceOrder<'info> {
 
 impl<'info> PlaceOrder<'info> {
     pub fn validate(&self, size: u64, expected_return: u64, a_end: u64, b_end: u64) -> Result<()> {
-        // Validation of the filler account is done through seeds requiring the authority key to derive
+        // Validation of the user account is done through seeds requiring the authority key to derive
         // their filler.
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
+
+        // Validation of the market inside the user account being the same as the one we are placing
+        // an order on.
+        assert_eq!(self.market.key(), self.user.market.key());
 
         assert_ne!(size, 0); // Orders cannot be 0.
         assert_ne!(expected_return, 0); // Make sure they get something back

@@ -24,7 +24,7 @@ pub mod seagull {
 
     #[access_control(ctx.accounts.validate())]
     pub fn init_filler(
-        ctx: Context<InitFiller>
+        ctx: Context<InitUser>
     ) -> Result<()> {
         ctx.accounts.handle()
     }

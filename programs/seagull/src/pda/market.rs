@@ -20,13 +20,8 @@ pub struct Market {
 }
 
 impl Market {
-    pub const LEN: usize = 8  // Anchor Account Discriminator
-        + 32 // quote_mint: Pubkey
-        + 32 // quote_holding_account: Pubkey
-        + 32 // base_mint: Pubkey
-        + 32 // base_holding_account: Pubkey
-        + 32 // order_queue: Pubkey
-    ;
+    pub const LEN: usize = 160;
+    const _LEN_CHECK: [u8; Market::LEN] = [0; mem::size_of::<Market>()];
 
     pub fn seeds<'a>(quote_mint: &'a Pubkey, base_mint: &'a Pubkey) -> Vec<&'a[u8]> {
         vec![quote_mint.as_ref(), base_mint.as_ref()]
@@ -44,16 +39,16 @@ impl Market {
 #[account(zero_copy)]
 #[repr(transparent)]
 pub struct OrderQueue {
-    pub queue: [u8; 91184]
+    pub queue: [u8; 8592]
 }
-const _: [u8; mem::size_of::<OrderQueue>()] = [0; OrderQueue::LEN - 8];
+const _: [u8; mem::size_of::<OrderQueue>()] = [0; OrderQueue::LEN];
 
 pub type OrderQueueCritbit = Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>;
 
 #[derive(Default, Copy, Clone)]
 #[repr(packed)]
 pub struct OrderInfo {
-    pub size: u64,
+    pub size: bool,
     pub side: Side,
     pub expected_return: u64,
 
@@ -66,15 +61,6 @@ unsafe impl Zeroable for OrderInfo {}
 unsafe impl Pod for OrderInfo {}
 
 impl OrderInfo {
-    pub const LEN: usize =
-        8 // size: u64
-            + 1 // side: Side
-            + 8 // expected_return: u64
-            + 8 // pub a_end: Slot
-            + 8 // pub b_end: Slot
-            + 32 + 1 // filler: Option<Pubkey>
-    ;
-
     pub fn from(size: u64, side: Side, expected_return: u64, a_end: Slot, b_end: Slot) -> OrderInfo {
         OrderInfo {
             size, side, expected_return, a_end, b_end,
@@ -83,20 +69,13 @@ impl OrderInfo {
     }
 
     pub fn get_key(&self) -> u128 {
-        todo!()
+
     }
 }
 
 impl OrderQueue {
-    pub const LEN: usize = 8  // Anchor Account Discriminator
-        + 8 + 4 + 4  // CitBit Header
-        + Self::get_allocator_len(32, CRITBIT_NUM_NODES)
-        + Self::get_allocator_len(OrderInfo::LEN, MAX_ORDERS)
-    ;
-
-    const fn get_allocator_len(t_size: usize, size: usize) -> usize {
-        8 + 4 + 4 + (16 + t_size) * size
-    }
+    pub const LEN: usize = 8592;
+    const _LEN_CHECK: [u8; OrderQueue::LEN] = [0; mem::size_of::<OrderQueue>()];
 }
 
 #[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone, Copy)]

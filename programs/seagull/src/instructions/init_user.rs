@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
-use crate::pda::{Filler, Market};
+use crate::pda::{User, Market};
 
 #[derive(Accounts)]
-pub struct InitFiller<'info> {
-    // Funds the creation of this market account!
+#[instruction(user_id: u64)]
+pub struct InitUser<'info> {
     #[account(mut)]
     authority: Signer<'info>,
 
@@ -13,42 +13,32 @@ pub struct InitFiller<'info> {
 
     quote_mint: Box<Account<'info, Mint>>,
 
-    #[account(
-        init,
-        payer = authority,
-        token::mint = quote_mint,
-        token::authority = market
-    )]
+    #[account(token::mint = quote_mint)]
     quote_account: Box<Account<'info, TokenAccount>>,
 
     base_mint: Box<Account<'info, Mint>>,
 
-    #[account(
-        init,
-        payer = authority,
-        token::mint = base_mint,
-        token::authority = market
-    )]
+    #[account(token::mint = base_mint)]
     base_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init,
         payer = authority,
-        space = Filler::LEN,
+        space = User::LEN + 8,
         seeds = [
             b"Filler".as_ref(),
-            authority.key().as_ref(),
-            market.key().as_ref()
+            market.key().as_ref(),
+            user_id.to_le_bytes().as_ref()
         ],
         bump
     )]
-    filler: Box<Account<'info, Filler>>,
+    user: Box<Account<'info, User>>,
 
     system_program: Program<'info, System>,
     token_program: Program<'info, Token>
 }
 
-impl<'info> InitFiller<'info> {
+impl<'info> InitUser<'info> {
     pub fn validate(&self) -> Result<()> {
         assert_eq!(self.market.base_mint.key(), self.base_mint.key());
         assert_eq!(self.market.quote_mint.key(), self.quote_mint.key());
@@ -57,13 +47,13 @@ impl<'info> InitFiller<'info> {
     }
 
     pub fn handle(&mut self) -> Result<()> {
-        let filler = &mut self.filler;
-        filler.authority = self.authority.key();
-        filler.market = self.market.key();
-        filler.quote_account = self.quote_mint.key();
-        filler.quote_locked = 0;
-        filler.base_account = self.base_account.key();
-        filler.base_locked = 0;
+        let user = &mut self.user;
+        user.authority = self.authority.key();
+        user.market = self.market.key();
+        user.quote_account = self.quote_mint.key();
+        user.quote_locked = 0;
+        user.base_account = self.base_account.key();
+        user.base_locked = 0;
         Ok(())
     }
 }

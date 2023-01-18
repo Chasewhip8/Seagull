@@ -1,28 +1,21 @@
+use std::mem;
 use anchor_lang::prelude::*;
 
 #[account]
 #[derive(Default, Debug)]
-pub struct Filler {
+pub struct User {
     pub authority: Pubkey,
     pub market: Pubkey,
 
-    pub base_account: Pubkey,
     pub base_locked: u64,
-
-    pub quote_account: Pubkey,
     pub quote_locked: u64
 }
 
-impl Filler {
-    pub const LEN: usize = 8  // Anchor Account Discriminator
-        + 32 // authority: Pubkey
-        + 32 // market: Pubkey
-        + 32 // base_account: Pubkey
-        + 8  // base_locked: u64
-        + 32 // quote_account: Pubkey
-        + 8  // quote_locked: u64
-    ;
+impl User {
+    pub const LEN: usize = 80;
+    const _LEN_CHECK: [u8; User::LEN] = [0; mem::size_of::<User>()];
 
+    // TODO fix seeds
     pub fn seeds<'a>(owner: &'a Pubkey, market: &'a Pubkey) -> Vec<&'a[u8]> {
         vec![owner.as_ref(), market.as_ref()]
     }

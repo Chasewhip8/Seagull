@@ -1,8 +1,5 @@
-use std::io::Read;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-
-use sokoban::Critbit;
 
 use crate::pda::{Market, OrderQueue};
 
@@ -35,7 +32,7 @@ pub struct InitMarket<'info> {
     #[account(
         init,
         payer = payer,
-        space = OrderQueue::LEN,
+        space = OrderQueue::LEN + 8,
         seeds = [
             b"OrderQueue".as_ref(),
             &quote_mint.key().as_ref(),
@@ -48,7 +45,7 @@ pub struct InitMarket<'info> {
     #[account(
         init,
         payer = payer,
-        space = Market::LEN,
+        space = Market::LEN + 8,
         seeds = [
             &quote_mint.key().as_ref(),
             &base_mint.key().as_ref()
@@ -76,8 +73,6 @@ impl<'info> InitMarket<'info> {
         market.base_mint = self.base_mint.key();
         market.base_holding_account = self.base_holding_account.key();
         market.order_queue = self.order_queue.key();
-
-        // self.order_queue.load_mut()?;
 
         Ok(())
     }

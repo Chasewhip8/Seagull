@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Token};
 
-use crate::pda::{Filler, Market, OrderQueue};
+use crate::pda::{User, Market, OrderQueue};
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
@@ -16,16 +16,8 @@ pub struct FillOrder<'info> {
     #[account(mut)]
     order_queue: AccountLoader<'info, OrderQueue>,
 
-    #[account(
-        mut,
-        seeds = [
-            b"Filler".as_ref(),
-            authority.key().as_ref(),
-            market.key().as_ref()
-        ],
-        bump
-    )]
-    filler: Box<Account<'info, Filler>>,
+    #[account(mut)]
+    user: Box<Account<'info, User>>,
 
     system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
@@ -34,12 +26,14 @@ pub struct FillOrder<'info> {
 
 impl<'info> FillOrder<'info> {
     pub fn validate(&self) -> Result<()> {
-        assert_eq!(self.filler.authority.key(), self.authority.key());
+        assert_eq!(self.user.authority.key(), self.authority.key()); // Ensure the user account belongs to the user!
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
+        // TODO Fill order validation
         Ok(())
     }
 
     pub fn handle(&mut self) -> Result<()> {
+        // TODO Fill order logic
         Ok(())
     }
 }
