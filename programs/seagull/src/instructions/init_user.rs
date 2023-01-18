@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::token::{Token, TokenAccount};
+use crate::constants::ID_RESERVED_SIDE_BIT;
 
 use crate::pda::{User, Market};
 
@@ -11,14 +12,10 @@ pub struct InitUser<'info> {
 
     market: Box<Account<'info, Market>>,
 
-    quote_mint: Box<Account<'info, Mint>>,
-
-    #[account(token::mint = quote_mint)]
+    #[account(token::mint = market.quote_mint)]
     quote_account: Box<Account<'info, TokenAccount>>,
 
-    base_mint: Box<Account<'info, Mint>>,
-
-    #[account(token::mint = base_mint)]
+    #[account(token::mint = market.base_mint)]
     base_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
@@ -44,8 +41,7 @@ impl<'info> InitUser<'info> {
         //                     initialized account.
         assert!(user_id > 0); // 0 is empty in the filler struct
 
-        assert_eq!(self.market.base_mint.key(), self.base_mint.key());
-        assert_eq!(self.market.quote_mint.key(), self.quote_mint.key());
+        assert_eq!(user_id & ID_RESERVED_SIDE_BIT, 0, "Reserved upper byte needs to be 0'd."); // Reserve this byte for side encoding in orders.
 
         Ok(())
     }

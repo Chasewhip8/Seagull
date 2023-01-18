@@ -4,4 +4,10 @@ use anchor_lang::error_code;
 pub enum SeagullError {
     #[msg("Order Queue is full!")]
     OrderQueueFull,
+
+    #[msg("The order at this price exists and is being filled already!")]
+    OrderExistsAndFilled,
+
+    #[msg("The order at this price exists and is the opposite side!")]
+    OrderExistsSideMismatch,
 }

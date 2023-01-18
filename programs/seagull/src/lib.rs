@@ -30,7 +30,7 @@ pub mod seagull {
         ctx.accounts.handle(user_id)
     }
 
-    #[access_control(ctx.accounts.validate(size, lowest_price, a_end, b_end))]
+    #[access_control(ctx.accounts.validate(size, side, lowest_price, a_end, b_end))]
     pub fn place_order(
         ctx: Context<PlaceOrder>,
         size: u64,

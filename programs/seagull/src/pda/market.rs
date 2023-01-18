@@ -5,7 +5,8 @@ use bytemuck::{Pod, Zeroable};
 
 use sokoban::Critbit;
 
-use crate::constants::{CRITBIT_NUM_NODES, MAX_ORDERS};
+use crate::constants::{CRITBIT_NUM_NODES, ID_RESERVED_SIDE_BIT, MAX_ORDERS, NULL_FILLER};
+use crate::pda::Side::{BUY, SELL};
 
 #[account]
 #[derive(Default, Debug)]
@@ -23,6 +24,13 @@ impl Market {
     pub const LEN: usize = 160;
     const _LEN_CHECK: [u8; Market::LEN] = [0; mem::size_of::<Market>()];
 
+    pub fn get_market_info_for_side(&self, side: Side) -> (Pubkey, Pubkey) {
+        match side {
+            Side::BUY => (self.quote_mint, self.quote_holding_account),
+            Side::SELL => (self.base_mint, self.base_holding_account)
+        }
+    }
+
     pub fn seeds<'a>(quote_mint: &'a Pubkey, base_mint: &'a Pubkey) -> Vec<&'a[u8]> {
         vec![quote_mint.as_ref(), base_mint.as_ref()]
     }
@@ -39,7 +47,7 @@ impl Market {
 #[account(zero_copy)]
 #[repr(transparent)]
 pub struct OrderQueue {
-    pub queue: [u8; 9520]
+    pub queue: [u8; 9264]
 }
 
 impl OrderQueue {
@@ -54,10 +62,7 @@ pub type OrderQueueCritbit = Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>;
 #[derive(Default, Copy, Clone)]
 #[repr(packed)]
 pub struct OrderInfo {
-    //pub user: u64, First 64 bits of t
-
     pub size: u64,
-    pub side: Side,
     pub a_end: Slot,
     pub b_end: Slot,
 
@@ -67,15 +72,15 @@ unsafe impl Zeroable for OrderInfo {}
 unsafe impl Pod for OrderInfo {}
 
 impl OrderInfo {
-    pub fn from(size: u64, side: Side, a_end: Slot, b_end: Slot) -> OrderInfo {
+    pub fn from(size: u64, a_end: Slot, b_end: Slot) -> OrderInfo {
         OrderInfo {
-            size, side, a_end, b_end,
-            filler_id: 0
+            size, a_end, b_end,
+            filler_id: NULL_FILLER
         }
     }
 
-    pub fn get_key(price: u64, user_id: u64) -> u128 {
-        ((price as u128) << 64) | (user_id as u128) // Upper bits: price, Lower bits: user_id
+    pub fn get_key(price: u64, side: Side, user_id: u64) -> u128 {
+        ((price as u128) << 64) | ((user_id | side.get_side_bit()) as u128) // Upper bits: price, Lower bits: user_id, 64th bit is side.
     }
 
     pub fn get_price_from_key(key: u128) -> u64 {
@@ -85,17 +90,35 @@ impl OrderInfo {
     pub fn get_user_id_from_key(key: u128) -> u64 {
         key as u64
     }
+
+    pub fn get_side_from_key(key: u128) -> Side {
+        let bit = ((key as u64) & ID_RESERVED_SIDE_BIT) != 0;
+        Side::from_side_bit(bit)
+    }
 }
 
-#[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone, Copy)]
+#[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum Side {
     BUY,
     SELL
 }
 
+impl Side {
+    fn get_side_bit(self) -> u64 {
+        match self {
+            BUY => ID_RESERVED_SIDE_BIT,
+            _ => 0
+        }
+    }
+
+    fn from_side_bit(bit: bool) -> Side {
+        return if bit { BUY } else { SELL }
+    }
+}
+
 impl Default for Side {
     fn default() -> Self {
-        Side::BUY
+        BUY
     }
 }

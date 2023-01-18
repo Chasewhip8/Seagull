@@ -7,3 +7,7 @@ pub const B_MIN_T: u64 = 0; // Minimum Backstop Duration Slots
 
 pub const MAX_ORDERS: usize = 64;
 pub const CRITBIT_NUM_NODES: usize = MAX_ORDERS * 2;
+
+pub const NULL_FILLER: u64 = 0;
+
+pub const ID_RESERVED_SIDE_BIT: u64 = 1 << 63;
