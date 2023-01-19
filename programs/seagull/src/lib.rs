@@ -8,6 +8,7 @@ mod error;
 mod pda;
 mod instructions;
 mod constants;
+mod execute;
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
@@ -42,14 +43,15 @@ pub mod seagull {
         ctx.accounts.handle(size, side, lowest_price, a_end, b_end)
     }
 
-    #[access_control(ctx.accounts.validate(filler_size, filler_price, filler_expire_slot))]
+    #[access_control(ctx.accounts.validate(filler_side, filler_size, filler_price, filler_expire_slot))]
     pub fn fill_order(
         ctx: Context<FillOrder>,
         filler_side: Side,
         filler_size: u64,
         filler_price: u64,
-        filler_expire_slot: u64
+        filler_expire_slot: u64,
+        fill_instant_only: bool
     ) -> Result<()> {
-        ctx.accounts.handle(filler_side, filler_size, filler_price, filler_expire_slot)
+        ctx.accounts.handle(filler_side, filler_size, filler_price, filler_expire_slot, fill_instant_only)
     }
 }

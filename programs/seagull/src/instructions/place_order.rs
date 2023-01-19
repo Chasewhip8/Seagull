@@ -27,8 +27,8 @@ pub struct PlaceOrder<'info> {
     market: Box<Account<'info, Market>>,
 
     #[account(
-    mut,
-    token::mint = side_mint
+        mut,
+        token::mint = side_mint
     )]
     side_holding_account: Box<Account<'info, TokenAccount>>, // Account inside of the market struct to hold assets that are locked
 
@@ -80,10 +80,7 @@ impl<'info> PlaceOrder<'info> {
         self.transfer_to_market_cpi(size)?;
 
         // Update the corresponding user accounts locked token balance.
-        match side {
-            Side::BUY => self.user.quote_locked += size,
-            Side::SELL => self.user.base_locked += size
-        };
+        self.user.add_to_side(side, size);
 
         let buf = &mut self.order_queue.load_mut()?.queue;
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();

@@ -1,19 +1,32 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Token};
+use anchor_lang::solana_program::entrypoint::ProgramResult;
+use anchor_lang::solana_program::program::invoke;
+use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
+use crate::execute::execute_order;
 
 use crate::pda::{User, Market, OrderQueue, OrderQueueCritbit, OrderInfo, FillerInfo};
-use crate::error::SeagullError;
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
-#[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64)]
+#[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64, fill_instant_only: bool)]
 pub struct FillOrder<'info> {
     #[account(mut)]
     authority: Signer<'info>,
 
     #[account(mut)]
+    filler_side_account: Box<Account<'info, TokenAccount>>, // Mint is enforced to be the correct side in validation below!
+    side_mint: Box<Account<'info, Mint>>,
+
+    #[account(mut)]
     market: Box<Account<'info, Market>>,
+
+    #[account(
+        mut,
+        token::mint = side_mint
+    )]
+    side_holding_account: Box<Account<'info, TokenAccount>>, // Account inside of the market struct to hold assets that are locked
 
     #[account(mut)]
     order_queue: AccountLoader<'info, OrderQueue>,
@@ -27,9 +40,16 @@ pub struct FillOrder<'info> {
 }
 
 impl<'info> FillOrder<'info> {
-    pub fn validate(&self, filler_size: u64, filler_price: u64, filler_max_a_end: u64) -> Result<()> {
+    pub fn validate(&self, filler_side: Side, filler_size: u64, filler_price: u64, filler_max_a_end: u64) -> Result<()> {
         assert_eq!(self.filler.authority.key(), self.authority.key()); // Ensure the user account belongs to the user!
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
+
+        // Validation of the instruction side and the passed in accounts, ensuring the mints match.
+        let (side_mint, _) = self.market.get_market_info_for_side(filler_side);
+        assert_eq!(self.side_mint.key(), side_mint);
+
+        // Validation of the user side account and the corresponding side mint passed in.
+        assert_eq!(self.filler_side_account.mint.key(), self.side_mint.key());
 
         assert_ne!(filler_size, 0);
         assert_ne!(filler_price, 0);
@@ -38,43 +58,69 @@ impl<'info> FillOrder<'info> {
         Ok(())
     }
 
-    pub fn handle(&mut self, filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64) -> Result<()> {
+    pub fn handle(&mut self, filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64, fill_instant_only: bool) -> Result<()> {
         let buf = &mut self.order_queue.load_mut()?.queue;
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
 
         if order_queue.len() == 0 {
-            return Err(error!(SeagullError::OrderQueueEmpty));
+            msg!("Match: Order queue empty!");
+            return Ok(());
         }
-        
-        if FillOrder::fill_order(
-            order_queue, 
-            filler_side, 
-            FillerInfo { 
+
+        let current_time = self.clock.slot;
+
+        // Do instant matching for all orders now
+        for (key, order_info) in order_queue.iter() {
+            if order_info.a_end < current_time
+                || OrderInfo::get_side_from_key(*key) == filler_side
+                || OrderInfo::get_price_from_key(*key) > filler_price {
+                continue;
+            }
+
+            // Can instant match with this order.
+            // TODO update the price to be a FP32
+            // Update filler locked balance and issue transfer
+            // The user will need to issue a settle_funds tx which will recount all open orders and settle the diff
+
+            execute_order()
+        }
+
+        if fill_instant_only {
+            msg!("Match: fill_instant_only flag set, skipping order matching.");
+            return Ok(());
+        }
+
+        if FillOrder::match_order(
+            order_queue,
+            filler_side,
+            FillerInfo {
                 id: self.filler.user_id,
                 price: filler_price,
                 max_size: filler_size,
                 expire_slot: filler_expire_slot
             }
-        ) { 
-            msg!("Filled!");
+        ) {
+            self.transfer_to_market_cpi(filler_size)?;
+
+            // Update the corresponding user accounts locked token balance.
+            self.filler.add_to_side(filler_side, filler_size);
+
+            msg!("Match: Matched Order!");
         }
 
         Ok(())
     }
 
-    fn fill_order(mut order_queue: &OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> bool {
+    fn match_order(mut order_queue: &OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> bool {
         let mut rematch = false;
         let mut matched_initial = false;
         let mut is_first = true;
 
         loop {
             for (key, order_info) in order_queue.iter_mut() {
-                let side = OrderInfo::get_side_from_key(*key);
-
-                let asking_price = OrderInfo::get_price_from_key(*key);
-                if order_info.a_end > filler_info.expire_slot
-                    || asking_price > filler_info.price // We cannot provide a good enough price to fill this order
-                    || side == filler_side // We cannot fill our own side.
+                if OrderInfo::get_side_from_key(*key) == filler_side // We cannot fill our own side.
+                    || order_info.a_end > filler_info.expire_slot
+                    || OrderInfo::get_price_from_key(*key) > filler_info.price // We cannot provide a good enough price to fill this order
                     || (order_info.has_filler() && order_info.filler_info.price >= filler_info.price) { // We cant beat the current price.
                     continue;
                 }
@@ -83,7 +129,7 @@ impl<'info> FillOrder<'info> {
                 if is_first {
                     matched_initial = true;
                 }
-                
+
                 if order_info.has_filler() {
                     // There was an existing filler! But we beat their price, we will try and kindly rematch theirs as well.
                     let old_filler = order_info.filler_info.clone();
@@ -106,5 +152,26 @@ impl<'info> FillOrder<'info> {
                 return matched_initial; // Success! We matched our order and maybe a few we misplaced!
             }
         }
+    }
+
+    fn transfer_to_market_cpi(&self, amount: u64) -> ProgramResult {
+        invoke(
+            &transfer_checked(
+                self.token_program.key,
+                &self.filler_side_account.key(),
+                &self.side_mint.key(),
+                &self.side_holding_account.key(),
+                self.authority.key,
+                &[],
+                amount,
+                self.side_mint.decimals,
+            )?,
+            &[
+                self.filler_side_account.to_account_info(),
+                self.side_mint.to_account_info(),
+                self.side_holding_account.to_account_info(),
+                self.authority.to_account_info()
+            ]
+        )
     }
 }
