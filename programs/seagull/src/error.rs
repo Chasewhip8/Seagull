@@ -13,4 +13,7 @@ pub enum SeagullError {
 
     #[msg("The order queue for the market was empty!")]
     OrderQueueEmpty,
+
+    #[msg("Their were no available orders to match the fill to!")]
+    OrderNotMatched,
 }

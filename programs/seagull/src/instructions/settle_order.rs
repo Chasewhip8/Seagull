@@ -10,14 +10,10 @@ pub struct PlaceOrder<'info> {
 
     market: Box<Account<'info, Market>>,
 
-    #[account(
-        address = market.base_mint
-    )]
+    #[account(address = market.base_mint)]
     base_mint: Box<Account<'info, Mint>>,
 
-    #[account(
-        address = market.quote_mint
-    )]
+    #[account(address = market.quote_mint)]
     quote_mint: Box<Account<'info, Mint>>,
 
     #[account(mut)]

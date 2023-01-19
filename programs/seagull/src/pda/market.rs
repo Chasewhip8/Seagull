@@ -81,6 +81,12 @@ pub struct FillerInfo {
 unsafe impl Zeroable for FillerInfo {}
 unsafe impl Pod for FillerInfo {}
 
+impl FillerInfo {
+    pub fn is_valid(&self) -> bool {
+        self.id != NULL_FILLER
+    }
+}
+
 impl OrderInfo {
     pub fn from(size: u64, a_end: Slot) -> OrderInfo {
         OrderInfo {
@@ -89,7 +95,7 @@ impl OrderInfo {
     }
 
     pub fn has_filler(&self) -> bool {
-        self.filler_info.id != NULL_FILLER
+        self.filler_info.is_valid()
     }
 
     pub fn get_key(price: u64, side: Side, user_id: u64) -> u128 {

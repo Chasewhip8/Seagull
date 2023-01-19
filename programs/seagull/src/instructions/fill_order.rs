@@ -7,6 +7,8 @@ use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
 
 use crate::pda::{User, Market, OrderQueue, OrderQueueCritbit, OrderInfo, FillerInfo};
 use crate::pda::market::Side;
+use crate::events::{OrderMatchedEvent, OrderRematchFailEvent};
+use crate::error::SeagullError;
 
 #[derive(Accounts)]
 #[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64)]
@@ -66,7 +68,9 @@ impl<'info> FillOrder<'info> {
             return Ok(());
         }
 
-        if FillOrder::match_order(
+        // Match the order and redistribute others or error.
+        // We do NOT error if we fail to redistribute other orders, just fail if we cannot match our own.
+        FillOrder::match_order(
             order_queue,
             filler_side,
             FillerInfo {
@@ -75,58 +79,64 @@ impl<'info> FillOrder<'info> {
                 max_size: filler_size,
                 expire_slot: filler_expire_slot
             }
-        ) {
-            self.transfer_to_market_cpi(filler_size)?;
+        )?;
 
-            // Update the corresponding user accounts locked token balance.
-            self.filler.add_to_side(filler_side, filler_size);
+        self.transfer_to_market_cpi(filler_size)?;
 
-            msg!("Match: Matched Order!");
-        }
+        // Update the corresponding user accounts locked token balance.
+        self.filler.add_to_side(filler_side, filler_size);
+
+        msg!("Match: Matched Order!");
 
         Ok(())
     }
 
-    fn match_order(order_queue: &mut OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> bool {
-        let mut rematch = false;
-        let mut matched_initial = false;
-        let mut is_first = true;
-
+    fn match_order(order_queue: &mut OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> Result<()> {
+        let mut is_first_order = true;
+        let mut last_matched_order_id = 0;
         loop {
+            let mut matched = false;
+
             for (key, order_info) in order_queue.iter_mut() {
-                if OrderInfo::get_side_from_key(*key) == filler_side // We cannot fill our own side.
+                let key = *key;
+                if OrderInfo::get_side_from_key(key) == filler_side // We cannot fill our own side.
                     || order_info.a_end > filler_info.expire_slot
-                    || OrderInfo::get_price_from_key(*key) > filler_info.price // We cannot provide a good enough price to fill this order
+                    || OrderInfo::get_price_from_key(key) > filler_info.price // We cannot provide a good enough price to fill this order
                     || (order_info.has_filler() && order_info.filler_info.price >= filler_info.price) { // We cant beat the current price.
                     continue;
                 }
 
-                // This order can be matched with our filler.
-                if is_first {
-                    matched_initial = true;
-                }
+                last_matched_order_id = key;
+                std::mem::swap(&mut order_info.filler_info, &mut filler_info);
+                matched = true;
 
-                if order_info.has_filler() {
-                    // There was an existing filler! But we beat their price, we will try and kindly rematch theirs as well.
-                    let old_filler = order_info.filler_info.clone();
-                    order_info.filler_info = filler_info;
-                    filler_info = old_filler;
-
-                    // Set rematch to true so we can go through the entire order_queue again. TODO check if this is needed, if the items are sorted maybe not?
-                    rematch = true;
-                    break
-                } else {
-                    order_info.filler_info = filler_info;
-                }
+                // Emit an even to log when we fill
+                emit!(OrderMatchedEvent {
+                    order_id: key,
+                    new_filler_id: order_info.filler_info.id,
+                    replaced_filer_id: filler_info.id
+                });
             }
 
-            is_first = false;
+            // This condition will only ever be false when the first, our initial, order fails to match.
+            if !matched {
+                if is_first_order{
+                    return Err(error!(SeagullError::OrderNotMatched));
+                }
 
-            if rematch {
-                rematch = false;
-            } else {
-                return matched_initial; // Success! We matched our order and maybe a few we misplaced!
+                emit!(OrderRematchFailEvent {
+                    original_order_id: last_matched_order_id,
+                    filler_id: filler_info.id
+                });
+                return Ok(());
             }
+
+            // We swapped order infos above so this is true when we finish redistributing orders.
+            if !filler_info.is_valid() {
+                return Ok(());
+            }
+
+            is_first_order = false; // Not the first order anymore on the next iteration if we got here.
         }
     }
 

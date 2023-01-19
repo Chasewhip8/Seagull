@@ -35,8 +35,8 @@ pub struct InitMarket<'info> {
         space = OrderQueue::LEN + 8,
         seeds = [
             b"OrderQueue".as_ref(),
-            &quote_mint.key().as_ref(),
-            &base_mint.key().as_ref()
+            quote_mint.key().as_ref(),
+            base_mint.key().as_ref()
         ],
         bump
     )]
@@ -47,8 +47,8 @@ pub struct InitMarket<'info> {
         payer = payer,
         space = Market::LEN + 8,
         seeds = [
-            &quote_mint.key().as_ref(),
-            &base_mint.key().as_ref()
+            quote_mint.key().as_ref(),
+            base_mint.key().as_ref()
         ],
         bump
     )]
