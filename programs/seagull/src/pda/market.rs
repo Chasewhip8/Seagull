@@ -47,7 +47,7 @@ impl Market {
 #[account(zero_copy)]
 #[repr(transparent)]
 pub struct OrderQueue {
-    pub queue: [u8; 9264]
+    pub queue: [u8; 10288]
 }
 
 impl OrderQueue {
@@ -59,24 +59,35 @@ impl OrderQueue {
 
 pub type OrderQueueCritbit = Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>;
 
-#[derive(Default, Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 #[repr(packed)]
 pub struct OrderInfo {
     pub size: u64,
     pub a_end: Slot,
-    pub b_end: Slot,
 
-    pub filler_id: u64,
+    pub filler_info: FillerInfo
 }
 unsafe impl Zeroable for OrderInfo {}
 unsafe impl Pod for OrderInfo {}
 
+#[derive(Copy, Clone, Default)]
+#[repr(packed)]
+pub struct FillerInfo {
+    pub id: u64,
+    pub price: u64,
+    pub max_size: u64,
+    pub expire_slot: Slot
+}
+
 impl OrderInfo {
-    pub fn from(size: u64, a_end: Slot, b_end: Slot) -> OrderInfo {
+    pub fn from(size: u64, a_end: Slot) -> OrderInfo {
         OrderInfo {
-            size, a_end, b_end,
-            filler_id: NULL_FILLER
+            size, a_end, filler_info: FillerInfo::default()
         }
+    }
+
+    pub fn has_filler(&self) -> bool {
+        self.filler_info.id != NULL_FILLER
     }
 
     pub fn get_key(price: u64, side: Side, user_id: u64) -> u128 {
@@ -114,11 +125,5 @@ impl Side {
 
     fn from_side_bit(bit: bool) -> Side {
         return if bit { BUY } else { SELL }
-    }
-}
-
-impl Default for Side {
-    fn default() -> Self {
-        BUY
     }
 }

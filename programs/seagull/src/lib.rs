@@ -41,4 +41,15 @@ pub mod seagull {
     ) -> Result<()> {
         ctx.accounts.handle(size, side, lowest_price, a_end, b_end)
     }
+
+    #[access_control(ctx.accounts.validate(filler_size, filler_price, filler_expire_slot))]
+    pub fn fill_order(
+        ctx: Context<FillOrder>,
+        filler_side: Side,
+        filler_size: u64,
+        filler_price: u64,
+        filler_expire_slot: u64
+    ) -> Result<()> {
+        ctx.accounts.handle(filler_side, filler_size, filler_price, filler_expire_slot)
+    }
 }

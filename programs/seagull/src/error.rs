@@ -10,4 +10,7 @@ pub enum SeagullError {
 
     #[msg("The order at this price exists and is the opposite side!")]
     OrderExistsSideMismatch,
+
+    #[msg("The order queue for the market was empty!")]
+    OrderQueueEmpty,
 }
