@@ -4,7 +4,7 @@ use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
-use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T, B_MAX_T, B_MIN_T, NULL_FILLER};
+use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T};
 
 use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, User};
 use crate::error::SeagullError;
@@ -69,7 +69,7 @@ impl<'info> PlaceOrder<'info> {
         assert!(AUCTION_MIN_T <= offset_a_end && offset_a_end <= AUCTION_MAX_T);
 
         let offset_b_end = b_end.checked_sub(current_slot).unwrap();
-        assert!(B_MIN_T <= offset_b_end && offset_b_end <= B_MAX_T);
+        assert!(AUCTION_MIN_T <= offset_b_end && offset_b_end <= AUCTION_MAX_T);
 
         Ok(())
     }

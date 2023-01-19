@@ -78,6 +78,8 @@ pub struct FillerInfo {
     pub max_size: u64,
     pub expire_slot: Slot
 }
+unsafe impl Zeroable for FillerInfo {}
+unsafe impl Pod for FillerInfo {}
 
 impl OrderInfo {
     pub fn from(size: u64, a_end: Slot) -> OrderInfo {

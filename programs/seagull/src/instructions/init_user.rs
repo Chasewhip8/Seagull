@@ -23,7 +23,7 @@ pub struct InitUser<'info> {
         payer = authority,
         space = User::LEN + 8,
         seeds = [
-            b"Filler".as_ref(),
+            b"user".as_ref(),
             market.key().as_ref(),
             user_id.to_le_bytes().as_ref()
         ],

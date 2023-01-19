@@ -4,13 +4,12 @@ use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
-use crate::execute::execute_order;
 
 use crate::pda::{User, Market, OrderQueue, OrderQueueCritbit, OrderInfo, FillerInfo};
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
-#[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64, fill_instant_only: bool)]
+#[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64)]
 pub struct FillOrder<'info> {
     #[account(mut)]
     authority: Signer<'info>,
@@ -40,7 +39,7 @@ pub struct FillOrder<'info> {
 }
 
 impl<'info> FillOrder<'info> {
-    pub fn validate(&self, filler_side: Side, filler_size: u64, filler_price: u64, filler_max_a_end: u64) -> Result<()> {
+    pub fn validate(&self, filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64) -> Result<()> {
         assert_eq!(self.filler.authority.key(), self.authority.key()); // Ensure the user account belongs to the user!
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
 
@@ -53,40 +52,17 @@ impl<'info> FillOrder<'info> {
 
         assert_ne!(filler_size, 0);
         assert_ne!(filler_price, 0);
-        assert!(filler_max_a_end >= self.clock.slot); // Ensure the fill is not expired.
+        assert!(filler_expire_slot >= self.clock.slot); // Ensure the fill is not expired.
 
         Ok(())
     }
 
-    pub fn handle(&mut self, filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64, fill_instant_only: bool) -> Result<()> {
+    pub fn handle(&mut self, filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64) -> Result<()> {
         let buf = &mut self.order_queue.load_mut()?.queue;
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
 
         if order_queue.len() == 0 {
             msg!("Match: Order queue empty!");
-            return Ok(());
-        }
-
-        let current_time = self.clock.slot;
-
-        // Do instant matching for all orders now
-        for (key, order_info) in order_queue.iter() {
-            if order_info.a_end < current_time
-                || OrderInfo::get_side_from_key(*key) == filler_side
-                || OrderInfo::get_price_from_key(*key) > filler_price {
-                continue;
-            }
-
-            // Can instant match with this order.
-            // TODO update the price to be a FP32
-            // Update filler locked balance and issue transfer
-            // The user will need to issue a settle_funds tx which will recount all open orders and settle the diff
-
-            execute_order()
-        }
-
-        if fill_instant_only {
-            msg!("Match: fill_instant_only flag set, skipping order matching.");
             return Ok(());
         }
 
@@ -111,7 +87,7 @@ impl<'info> FillOrder<'info> {
         Ok(())
     }
 
-    fn match_order(mut order_queue: &OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> bool {
+    fn match_order(order_queue: &mut OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> bool {
         let mut rematch = false;
         let mut matched_initial = false;
         let mut is_first = true;

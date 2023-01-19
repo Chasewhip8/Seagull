@@ -9,6 +9,8 @@ mod pda;
 mod instructions;
 mod constants;
 mod execute;
+mod math;
+mod events;
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
@@ -49,9 +51,8 @@ pub mod seagull {
         filler_side: Side,
         filler_size: u64,
         filler_price: u64,
-        filler_expire_slot: u64,
-        fill_instant_only: bool
+        filler_expire_slot: u64
     ) -> Result<()> {
-        ctx.accounts.handle(filler_side, filler_size, filler_price, filler_expire_slot, fill_instant_only)
+        ctx.accounts.handle(filler_side, filler_size, filler_price, filler_expire_slot)
     }
 }
