@@ -6,7 +6,6 @@ use bytemuck::{Pod, Zeroable};
 use sokoban::Critbit;
 
 use crate::constants::{CRITBIT_NUM_NODES, ID_RESERVED_SIDE_BIT, MAX_ORDERS, NULL_FILLER};
-use crate::math::fp32_div;
 use crate::pda::Side::{BUY, SELL};
 
 #[account]

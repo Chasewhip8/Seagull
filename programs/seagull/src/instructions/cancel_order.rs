@@ -4,6 +4,7 @@ use anchor_lang::solana_program::program::{invoke_signed};
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
+use crate::constants::BACKSTOP_LENGTH;
 
 use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, Side, User};
 use crate::error::SeagullError;
@@ -34,15 +35,14 @@ pub struct CancelOrder<'info> {
     #[account(mut)]
     order_queue: AccountLoader<'info, OrderQueue>,
 
-    token_program: Program<'info, Token>,
     market: Box<Account<'info, Market>>,
+    token_program: Program<'info, Token>,
+    clock: Sysvar<'info, Clock>
 }
 
 impl<'info> CancelOrder<'info> {
     pub fn validate(&self, order_id: u128) -> Result<()> {
-        assert_eq!(self.user.authority.key(), self.authority.key());
         assert_eq!(self.user.user_id, OrderInfo::get_user_id_from_key(order_id));
-
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
 
         Ok(())
@@ -74,6 +74,11 @@ impl<'info> CancelOrder<'info> {
         let order = self.validate_order(order_side, order_queue.get(&order_id))?;
         if order.has_filler() {
             return Err(error!(SeagullError::OrderNotCancelable));
+        }
+
+        // Only assert the owner is cancelling when the auction is running and we are before the backstop end.
+        if order.a_end + BACKSTOP_LENGTH > self.clock.slot {
+            assert_eq!(self.user.authority.key(), self.authority.key());
         }
 
         self.transfer_from_market_cpi(order.size)?; // Refund the user!
