@@ -17,11 +17,13 @@ pub struct Market {
     pub base_mint: Pubkey,
     pub base_holding_account: Pubkey,
 
-    pub order_queue: Pubkey // Pubkey of CritBit order queue
+    pub order_queue: Pubkey, // Pubkey of CritBit order queue
+
+    pub bump: u8
 }
 
 impl Market {
-    pub const LEN: usize = 160;
+    pub const LEN: usize = 161;
     const _LEN_CHECK: [u8; Market::LEN] = [0; mem::size_of::<Market>()];
 
     pub fn get_market_info_for_side(&self, side: Side) -> (Pubkey, Pubkey) {
@@ -30,18 +32,18 @@ impl Market {
             Side::SELL => (self.base_mint, self.base_holding_account)
         }
     }
+}
 
-    pub fn seeds<'a>(quote_mint: &'a Pubkey, base_mint: &'a Pubkey) -> Vec<&'a[u8]> {
-        vec![quote_mint.as_ref(), base_mint.as_ref()]
-    }
-
-    pub fn find_program_address(quote_mint: &Pubkey, base_mint: &Pubkey, program_id: &Pubkey) -> (Pubkey, u8) {
-        let seeds = Self::seeds(quote_mint, base_mint);
-        Pubkey::find_program_address(
-            seeds.as_slice(),
-            program_id,
-        )
-    }
+#[macro_export]
+macro_rules! gen_market_signer_seeds {
+    ($market:expr) => {
+        &[
+             b"Market".as_ref(),
+             $market.quote_mint.key().as_ref(),
+             $market.base_mint.key().as_ref(),
+             &[$market.bump],
+        ]
+    };
 }
 
 #[account(zero_copy)]

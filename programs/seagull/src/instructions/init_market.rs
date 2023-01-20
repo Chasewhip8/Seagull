@@ -47,6 +47,7 @@ pub struct InitMarket<'info> {
         payer = payer,
         space = Market::LEN + 8,
         seeds = [
+            b"Market".as_ref(),
             quote_mint.key().as_ref(),
             base_mint.key().as_ref()
         ],
@@ -65,14 +66,14 @@ impl<'info> InitMarket<'info> {
         Ok(())
     }
 
-    pub fn handle(&mut self) -> Result<()> {
+    pub fn handle(&mut self, bump: u8) -> Result<()> {
         let market = &mut self.market;
         market.quote_mint = self.quote_mint.key();
         market.quote_holding_account = self.quote_holding_account.key();
         market.base_mint = self.base_mint.key();
         market.base_holding_account = self.base_holding_account.key();
         market.order_queue = self.order_queue.key();
-
+        market.bump = bump;
         Ok(())
     }
 }

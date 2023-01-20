@@ -83,8 +83,6 @@ impl<'info> FillOrder<'info> {
 
         self.transfer_to_market_cpi(filler_size)?;
 
-        msg!("Match: Matched Order!");
-
         Ok(())
     }
 

@@ -8,7 +8,6 @@ mod error;
 mod pda;
 mod instructions;
 mod constants;
-mod execute;
 mod math;
 mod events;
 
@@ -22,7 +21,7 @@ pub mod seagull {
     pub fn init_market(
         ctx: Context<InitMarket>
     ) -> Result<()> {
-        ctx.accounts.handle()
+        ctx.accounts.handle(*ctx.bumps.get("market").unwrap())
     }
 
     #[access_control(ctx.accounts.validate(user_id))]
