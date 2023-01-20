@@ -55,7 +55,7 @@ impl<'info> CancelOrder<'info> {
         let order = order.unwrap();
 
         match order_side {
-            Side::BUY => {
+            Side::Buy => {
                 assert_eq!(self.refund_mint.key(), self.market.quote_mint);
             }
             _ => {

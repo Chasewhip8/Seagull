@@ -6,7 +6,7 @@ use bytemuck::{Pod, Zeroable};
 use sokoban::Critbit;
 
 use crate::constants::{CRITBIT_NUM_NODES, ID_RESERVED_SIDE_BIT, MAX_ORDERS, NULL_FILLER};
-use crate::pda::Side::{BUY, SELL};
+use crate::pda::Side::{Buy, Sell};
 
 #[account]
 #[derive(Default, Debug)]
@@ -29,8 +29,8 @@ impl Market {
 
     pub fn get_market_info_for_side(&self, side: Side) -> (Pubkey, Pubkey) {
         match side {
-            Side::BUY => (self.quote_mint, self.quote_holding_account),
-            Side::SELL => (self.base_mint, self.base_holding_account)
+            Side::Buy => (self.quote_mint, self.quote_holding_account),
+            Side::Sell => (self.base_mint, self.base_holding_account)
         }
     }
 
@@ -54,7 +54,7 @@ macro_rules! gen_market_signer_seeds {
 #[account(zero_copy)]
 #[repr(transparent)]
 pub struct OrderQueue {
-    pub queue: [u8; 10288]
+    pub queue: [u8; 10128]
 }
 
 impl OrderQueue {
@@ -126,19 +126,19 @@ impl OrderInfo {
 #[derive(Debug, AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum Side {
-    BUY,
-    SELL
+    Buy,
+    Sell
 }
 
 impl Side {
     fn get_side_bit(self) -> u64 {
         match self {
-            BUY => ID_RESERVED_SIDE_BIT,
+            Side::Buy => ID_RESERVED_SIDE_BIT,
             _ => 0
         }
     }
 
     fn from_side_bit(bit: bool) -> Side {
-        return if bit { BUY } else { SELL }
+        return if bit { Buy } else { Sell }
     }
 }

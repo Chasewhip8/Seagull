@@ -6,7 +6,7 @@ pub const AUCTION_MIN_T: u64 = 5; // Minimum Auction Duration Slots, >= 1 as any
 // in order to provide space for new orders.
 pub const BACKSTOP_LENGTH: u64 = 25;
 
-pub const MAX_ORDERS: usize = 64;
+pub const MAX_ORDERS: usize = 63;
 pub const CRITBIT_NUM_NODES: usize = MAX_ORDERS * 2;
 
 pub const NULL_FILLER: u64 = 0;
