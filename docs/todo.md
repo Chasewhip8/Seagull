@@ -1,0 +1,2 @@
+# Known Issues
+ - Orders cannot be cancelled unless we issue a cancel_order instruction with the accounts passed in, this means no programmatic way to clear the order-book when congested other than a keeper bot. This should be fixable by tying the user to the market and keeping track of what they deposit in the user pda. This comes at the drawback of needing an extra claim_funds instruction or a modification to cancel_order to refund all refunded orders. Added complexity but needed.
