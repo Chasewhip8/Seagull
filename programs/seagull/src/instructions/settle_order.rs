@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_lang::solana_program::program::{invoke, invoke_signed};
-use anchor_spl::associated_token::AssociatedToken;
+use anchor_lang::solana_program::program::{invoke_signed};
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
@@ -9,28 +8,26 @@ use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
 use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, Side, User};
 use crate::error::SeagullError;
 use crate::gen_market_signer_seeds;
+use crate::math::fp32_mul_floor;
 
 #[derive(Accounts)]
 #[instruction(order_id: u128)]
-pub struct PlaceOrder<'info> {
-    #[account(mut)]
-    payer: Signer<'info>,
-
+pub struct SettleOrder<'info> {
     market: Box<Account<'info, Market>>,
     base_mint: Box<Account<'info, Mint>>,
     quote_mint: Box<Account<'info, Mint>>,
 
     #[account(
-    mut,
-    token::mint = base_mint,
-    token::authority = market
+        mut,
+        token::mint = base_mint,
+        token::authority = market
     )]
     base_holding_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
-    mut,
-    token::mint = quote_mint,
-    token::authority = market
+        mut,
+        token::mint = quote_mint,
+        token::authority = market
     )]
     quote_holding_account: Box<Account<'info, TokenAccount>>,
 
@@ -42,26 +39,24 @@ pub struct PlaceOrder<'info> {
     // TODO maybe force ATA on these and maybe init them if needed down below instead of requiring
     //  possible attack hre would be for the filler to send it to a random address where the user might not see the funds
     #[account(
-    mut,
-    token::authority = order_user.authority
+        mut,
+        token::authority = order_user.authority
     )]
     order_user_account: Box<Account<'info, TokenAccount>>,
 
     order_filler: Box<Account<'info, User>>,
 
     #[account(
-    mut,
-    token::authority = order_filler.authority
+        mut,
+        token::authority = order_filler.authority
     )]
     order_filler_account: Box<Account<'info, TokenAccount>>,
 
-    system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
-    associated_token_program: Program<'info, AssociatedToken>,
     clock: Sysvar<'info, Clock>
 }
 
-impl<'info> PlaceOrder<'info> {
+impl<'info> SettleOrder<'info> {
     pub fn validate(&self, order_id: u128) -> Result<()> {
         assert_eq!(self.base_mint.key(), self.market.base_mint.key());
         assert_eq!(self.quote_mint.key(), self.market.quote_mint.key());
@@ -106,16 +101,18 @@ impl<'info> PlaceOrder<'info> {
         let order_side = OrderInfo::get_side_from_key(order_id);
         let order = self.validate_order(order_side, order_queue.get_mut(&order_id))?;
 
-        // Remove the order to prevent duplicate settles and clear the queue
-        order_queue.remove(&order_id);
+        let size = order.size;
+        let amount = fp32_mul_floor(size, OrderInfo::get_price_from_key(order_id))?;
+        let (filler_receive_amount, user_receive_amount) = match order_side {
+            Side::BUY => (amount, size), // If buy, size * price = quote to pay, base to take
+            _ => (size, amount)          // IF sell, size * price = base to pay, quote to take
+        };
 
-        // Transfer to user
-        let user_receive_amount = 0; // TODO
+        // Transfer assets to corresponding accounts!
         self.transfer_from_market_cpi(false, user_receive_amount, order_side)?;
-
-        // Transfer to filler
-        let filler_receive_amount = 0; // TODO
         self.transfer_from_market_cpi(true, filler_receive_amount, order_side)?;
+
+        order_queue.remove(&order_id); // Remove the order to prevent duplicate settles and clear the queue
 
         Ok(())
     }

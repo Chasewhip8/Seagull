@@ -1,8 +1,7 @@
 // Market Auction Time Restrictions
-// TODO: Make them sane
-pub const AUCTION_MAX_T: u64 = u64::MAX;  // Maximum Auction Duration Slots
-pub const AUCTION_MIN_T: u64 = 1; // Minimum Auction Duration Slots, >= 1 as anything else wouldn't start the auction.
-pub const BACKSTOP_LENGTH: u64 = 0; // Backstop Length after auction ends in slots
+pub const AUCTION_MAX_T: u64 = 50;  // Maximum Auction Duration Slots
+pub const AUCTION_MIN_T: u64 = 5; // Minimum Auction Duration Slots, >= 1 as anything else wouldn't start the auction.
+pub const BACKSTOP_LENGTH: u64 = 25; // Backstop Length after auction ends in slots
 
 pub const MAX_ORDERS: usize = 64;
 pub const CRITBIT_NUM_NODES: usize = MAX_ORDERS * 2;

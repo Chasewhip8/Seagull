@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
+use crate::math::fp32_calc_min_tick_sizes;
 
 use crate::pda::{Market, OrderQueue};
 
@@ -73,6 +74,7 @@ impl<'info> InitMarket<'info> {
         market.base_mint = self.base_mint.key();
         market.base_holding_account = self.base_holding_account.key();
         market.order_queue = self.order_queue.key();
+        market.min_tick_size = fp32_calc_min_tick_sizes(self.quote_mint.decimals);
         market.bump = bump;
         Ok(())
     }

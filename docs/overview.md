@@ -1,4 +1,4 @@
-# Seagull JIT Spot Market
+# Seagull JIT Spot Market (OUTDATED!)
 A JIT(Just in Time) auction mechanism can assist in tightening spreads on orders by allowing for Market Makers
 to properly hedge the other leg of the order on a more efficient, better priced, often CEX market. This should result 
 in tighter spreads to be achieved as the counterpart does not need to maintain a hedge constantly like on a 

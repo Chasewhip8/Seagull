@@ -13,14 +13,12 @@ use crate::error::SeagullError;
 #[derive(Accounts)]
 #[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64)]
 pub struct FillOrder<'info> {
-    #[account(mut)]
     authority: Signer<'info>,
 
     #[account(mut)]
     filler_side_account: Box<Account<'info, TokenAccount>>, // Mint is enforced to be the correct side in validation below!
     side_mint: Box<Account<'info, Mint>>,
 
-    #[account(mut)]
     market: Box<Account<'info, Market>>,
 
     #[account(
@@ -35,7 +33,6 @@ pub struct FillOrder<'info> {
     #[account(mut)]
     filler: Box<Account<'info, User>>,
 
-    system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
     clock: Sysvar<'info, Clock>
 }
@@ -53,7 +50,8 @@ impl<'info> FillOrder<'info> {
         assert_eq!(self.filler_side_account.mint.key(), self.side_mint.key());
 
         assert_ne!(filler_size, 0);
-        assert_ne!(filler_price, 0);
+        assert!(filler_price >= self.market.min_tick_size); // Make sure they get something back
+        assert!(self.market.price_tick_aligned(filler_price));
         assert!(filler_expire_slot >= self.clock.slot); // Ensure the fill is not expired.
 
         Ok(())

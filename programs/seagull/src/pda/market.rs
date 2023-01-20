@@ -6,6 +6,7 @@ use bytemuck::{Pod, Zeroable};
 use sokoban::Critbit;
 
 use crate::constants::{CRITBIT_NUM_NODES, ID_RESERVED_SIDE_BIT, MAX_ORDERS, NULL_FILLER};
+use crate::math::fp32_div;
 use crate::pda::Side::{BUY, SELL};
 
 #[account]
@@ -18,12 +19,13 @@ pub struct Market {
     pub base_holding_account: Pubkey,
 
     pub order_queue: Pubkey, // Pubkey of CritBit order queue
+    pub min_tick_size: u64, // FP32 of quote.
 
     pub bump: u8
 }
 
 impl Market {
-    pub const LEN: usize = 161;
+    pub const LEN: usize = 176;
     const _LEN_CHECK: [u8; Market::LEN] = [0; mem::size_of::<Market>()];
 
     pub fn get_market_info_for_side(&self, side: Side) -> (Pubkey, Pubkey) {
@@ -31,6 +33,10 @@ impl Market {
             Side::BUY => (self.quote_mint, self.quote_holding_account),
             Side::SELL => (self.base_mint, self.base_holding_account)
         }
+    }
+
+    pub fn price_tick_aligned(&self, price: u64) -> bool {
+        price % self.min_tick_size == 0
     }
 }
 

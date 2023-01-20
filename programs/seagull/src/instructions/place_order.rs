@@ -11,9 +11,8 @@ use crate::error::SeagullError;
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
-#[instruction(user_id: u64, size: u64, side: Side, lowest_price: u64, a_end: u64, b_end: u64)]
+#[instruction(user_id: u64, size: u64, side: Side, lowest_price: u64, a_end: u64)]
 pub struct PlaceOrder<'info> {
-    #[account(mut)]
     authority: Signer<'info>,
 
     #[account(mut)]
@@ -27,9 +26,6 @@ pub struct PlaceOrder<'info> {
     user_side_account: Box<Account<'info, TokenAccount>>, // Mint is enforced to be the correct side in validation below!
     side_mint: Box<Account<'info, Mint>>,
 
-    #[account(mut)]
-    market: Box<Account<'info, Market>>,
-
     #[account(
         mut,
         token::mint = side_mint
@@ -38,22 +34,17 @@ pub struct PlaceOrder<'info> {
 
     #[account(mut)]
     order_queue: AccountLoader<'info, OrderQueue>,
+    market: Box<Account<'info, Market>>,
 
-    system_program: Program<'info, System>,
     token_program: Program<'info, Token>,
     clock: Sysvar<'info, Clock>
 }
 
 impl<'info> PlaceOrder<'info> {
-    pub fn validate(&self, size: u64, side: Side, lowest_price: u64, a_end: u64, b_end: u64) -> Result<()> {
-        // Validation of the user account is done through seeds requiring the authority key to derive
-        // their filler.
+    pub fn validate(&self, size: u64, side: Side, lowest_price: u64, a_end: u64) -> Result<()> {
+        assert_eq!(self.user.authority.key(), self.authority.key());
 
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
-
-        // Validation of the market inside the user account being the same as the one we are placing
-        // an order on.
-        // assert_eq!(self.market.key(), self.user.market.key());
 
         // Validation of the instruction side and the passed in accounts, ensuring the mints match.
         let (side_mint, _) = self.market.get_market_info_for_side(side);
@@ -63,23 +54,19 @@ impl<'info> PlaceOrder<'info> {
         assert_eq!(self.user_side_account.mint.key(), self.side_mint.key());
 
         assert_ne!(size, 0); // Orders cannot be 0.
-        assert_ne!(lowest_price, 0); // Make sure they get something back
-
-        assert!(b_end >= a_end, "Backstop end needs to be greater than or equal to auction end");
+        assert!(lowest_price >= self.market.min_tick_size); // Make sure they get something back
+        assert!(self.market.price_tick_aligned(lowest_price));
 
         // Assert that the auction times fall within the acceptable range to reduce spam attacks.
         let current_slot = self.clock.slot;
 
         let offset_a_end = a_end.checked_sub(current_slot).unwrap();
-        assert!(AUCTION_MIN_T <= offset_a_end && offset_a_end <= AUCTION_MAX_T);
-
-        let offset_b_end = b_end.checked_sub(current_slot).unwrap();
-        assert!(AUCTION_MIN_T <= offset_b_end && offset_b_end <= AUCTION_MAX_T);
+        assert!((AUCTION_MIN_T..=AUCTION_MAX_T).contains(&offset_a_end));
 
         Ok(())
     }
 
-    pub fn handle(&mut self, size: u64, side: Side, lowest_price: u64, a_end: u64, b_end: u64) -> Result<()> {
+    pub fn handle(&mut self, size: u64, side: Side, lowest_price: u64, a_end: u64) -> Result<()> {
         // Transfer the funds to the holding account, if this fails we dont need to go further, if anything else fails we will
         // revert anyways so do it now.
         self.transfer_to_market_cpi(size)?;

@@ -14,7 +14,7 @@ pub struct InitUser<'info> {
         payer = authority,
         space = User::LEN + 8,
         seeds = [
-            b"user".as_ref(),
+            b"User".as_ref(),
             user_id.to_le_bytes().as_ref()
         ],
         bump

@@ -5,6 +5,12 @@ use std::convert::TryInto;
 
 pub const FP_32_ONE: u64 = 1 << 32;
 
+/// result is a fp32 of the minimum tick size
+#[inline(always)]
+pub fn fp32_calc_min_tick_sizes(base_decimals: u8) -> u64 {
+    1 << (32 - base_decimals)
+}
+
 /// a is fp0, b is fp32 and result is a/b fp0
 pub fn fp32_div(a: u64, b_fp32: u64) -> Option<u64> {
     ((a as u128) << 32)
@@ -90,6 +96,10 @@ fn fp64_ceil_util(x_fp64: u128) -> Option<u128> {
 
 #[test]
 fn test() {
+    // fp32_calc_min_tick_sizes
+    assert_eq!(fp32_calc_min_tick_sizes(0), FP_32_ONE);
+    assert_eq!(fp32_calc_min_tick_sizes(1), 1 << 31);
+
     // fp32_div
     assert_eq!(fp32_div(124345678765454, 45654 << 32).unwrap(), 2723653541);
     assert_eq!(fp32_div(124345678765454, 6787654 << 32).unwrap(), 18319389);

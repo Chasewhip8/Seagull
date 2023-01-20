@@ -32,16 +32,15 @@ pub mod seagull {
         ctx.accounts.handle(user_id)
     }
 
-    #[access_control(ctx.accounts.validate(size, side, lowest_price, a_end, b_end))]
+    #[access_control(ctx.accounts.validate(size, side, lowest_price, a_end))]
     pub fn place_order(
         ctx: Context<PlaceOrder>,
         size: u64,
         side: Side,
         lowest_price: u64,
-        a_end: u64,
-        b_end: u64
+        a_end: u64
     ) -> Result<()> {
-        ctx.accounts.handle(size, side, lowest_price, a_end, b_end)
+        ctx.accounts.handle(size, side, lowest_price, a_end)
     }
 
     #[access_control(ctx.accounts.validate(filler_side, filler_size, filler_price, filler_expire_slot))]
@@ -53,5 +52,21 @@ pub mod seagull {
         filler_expire_slot: u64
     ) -> Result<()> {
         ctx.accounts.handle(filler_side, filler_size, filler_price, filler_expire_slot)
+    }
+
+    #[access_control(ctx.accounts.validate(order_id))]
+    pub fn settle_order(
+        ctx: Context<SettleOrder>,
+        order_id: u128
+    ) -> Result<()> {
+        ctx.accounts.handle(order_id)
+    }
+
+    #[access_control(ctx.accounts.validate(order_id))]
+    pub fn cancel_order(
+        ctx: Context<CancelOrder>,
+        order_id: u128
+    ) -> Result<()> {
+        ctx.accounts.handle(order_id)
     }
 }
