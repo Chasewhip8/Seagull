@@ -102,7 +102,7 @@ impl<'info> SettleOrder<'info> {
         let order = self.validate_order(order_side, order_queue.get_mut(&order_id))?;
 
         let size = order.size;
-        let amount = fp32_mul_floor(size, OrderInfo::get_price_from_key(order_id))?;
+        let amount = fp32_mul_floor(size, OrderInfo::get_price_from_key(order_id)).unwrap();
         let (filler_receive_amount, user_receive_amount) = match order_side {
             Side::BUY => (amount, size), // If buy, size * price = quote to pay, base to take
             _ => (size, amount)          // IF sell, size * price = base to pay, quote to take
