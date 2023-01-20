@@ -9,6 +9,7 @@ use crate::constants::BACKSTOP_LENGTH;
 use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, Side, User};
 use crate::error::SeagullError;
 use crate::gen_market_signer_seeds;
+use crate::pda::Side::{Buy, Sell};
 
 #[derive(Accounts)]
 #[instruction(order_id: u128)]
@@ -55,10 +56,10 @@ impl<'info> CancelOrder<'info> {
         let order = order.unwrap();
 
         match order_side {
-            Side::Buy => {
+            Buy => {
                 assert_eq!(self.refund_mint.key(), self.market.quote_mint);
             }
-            _ => {
+            Sell => {
                 assert_eq!(self.refund_mint.key(), self.market.base_mint);
             }
         }

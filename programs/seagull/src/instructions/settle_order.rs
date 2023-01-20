@@ -9,6 +9,7 @@ use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, Side, User};
 use crate::error::SeagullError;
 use crate::gen_market_signer_seeds;
 use crate::math::fp32_mul_floor;
+use crate::pda::Side::{Buy, Sell};
 
 #[derive(Accounts)]
 #[instruction(order_id: u128)]
@@ -80,12 +81,12 @@ impl<'info> SettleOrder<'info> {
         assert_eq!(self.order_filler.user_id, filler_id);
 
         match order_side {
-            Side::Buy => {
+            Buy => {
                 // If the order was a buy order, filler gets quote, buyer gets base
                 assert_eq!(self.order_user_account.mint, self.market.base_mint);
                 assert_eq!(self.order_filler_account.mint, self.market.quote_mint);
             }
-            _ => {
+            Sell => {
                 // If the order was a sell order, filler gets base, buyer gets quote
                 assert_eq!(self.order_user_account.mint, self.market.quote_mint);
                 assert_eq!(self.order_filler_account.mint, self.market.base_mint);
@@ -104,8 +105,8 @@ impl<'info> SettleOrder<'info> {
         let size = order.size;
         let amount = fp32_mul_floor(size, OrderInfo::get_price_from_key(order_id)).unwrap();
         let (filler_receive_amount, user_receive_amount) = match order_side {
-            Side::Buy => (amount, size), // If buy, size * price = quote to pay, base to take
-            _ => (size, amount)          // IF sell, size * price = base to pay, quote to take
+            Buy => (amount, size), // If buy, size * price = quote to pay, base to take
+            Sell => (size, amount)          // IF sell, size * price = base to pay, quote to take
         };
 
         // Transfer assets to corresponding accounts!
@@ -123,12 +124,12 @@ impl<'info> SettleOrder<'info> {
             source_account,
             destination_account
         ) = match order_side {
-            Side::Buy => (
+            Buy => (
                 &self.base_mint,
                 &self.base_holding_account,
                 if is_filler { &self.order_filler_account } else { &self.order_user_account }
             ),
-            _ => (
+            Sell => (
                 &self.quote_mint,
                 &self.quote_holding_account,
                 if is_filler { &self.order_filler_account } else { &self.order_user_account }

@@ -29,8 +29,8 @@ impl Market {
 
     pub fn get_market_info_for_side(&self, side: Side) -> (Pubkey, Pubkey) {
         match side {
-            Side::Buy => (self.quote_mint, self.quote_holding_account),
-            Side::Sell => (self.base_mint, self.base_holding_account)
+            Buy => (self.quote_mint, self.quote_holding_account),
+            Sell => (self.base_mint, self.base_holding_account)
         }
     }
 
@@ -133,12 +133,12 @@ pub enum Side {
 impl Side {
     fn get_side_bit(self) -> u64 {
         match self {
-            Side::Buy => ID_RESERVED_SIDE_BIT,
-            _ => 0
+            Buy => ID_RESERVED_SIDE_BIT,
+            Sell => 0
         }
     }
 
     fn from_side_bit(bit: bool) -> Side {
-        return if bit { Buy } else { Sell }
+        if bit { Buy } else { Sell }
     }
 }
