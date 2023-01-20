@@ -83,9 +83,6 @@ impl<'info> FillOrder<'info> {
 
         self.transfer_to_market_cpi(filler_size)?;
 
-        // Update the corresponding user accounts locked token balance.
-        self.filler.add_to_side(filler_side, filler_size);
-
         msg!("Match: Matched Order!");
 
         Ok(())

@@ -16,4 +16,10 @@ pub enum SeagullError {
 
     #[msg("Their were no available orders to match the fill to!")]
     OrderNotMatched,
+
+    #[msg("Order was invalid!")]
+    OrderInvalid,
+
+    #[msg("Order was not found!")]
+    OrderNotFound,
 }

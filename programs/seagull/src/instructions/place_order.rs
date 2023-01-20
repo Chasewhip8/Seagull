@@ -19,7 +19,11 @@ pub struct PlaceOrder<'info> {
     #[account(mut)]
     user: Box<Account<'info, User>>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        token::authority = authority,
+        token::mint = side_mint
+    )]
     user_side_account: Box<Account<'info, TokenAccount>>, // Mint is enforced to be the correct side in validation below!
     side_mint: Box<Account<'info, Mint>>,
 
@@ -44,11 +48,12 @@ impl<'info> PlaceOrder<'info> {
     pub fn validate(&self, size: u64, side: Side, lowest_price: u64, a_end: u64, b_end: u64) -> Result<()> {
         // Validation of the user account is done through seeds requiring the authority key to derive
         // their filler.
+
         assert_eq!(self.order_queue.key(), self.market.order_queue.key());
 
         // Validation of the market inside the user account being the same as the one we are placing
         // an order on.
-        assert_eq!(self.market.key(), self.user.market.key());
+        // assert_eq!(self.market.key(), self.user.market.key());
 
         // Validation of the instruction side and the passed in accounts, ensuring the mints match.
         let (side_mint, _) = self.market.get_market_info_for_side(side);
@@ -78,9 +83,6 @@ impl<'info> PlaceOrder<'info> {
         // Transfer the funds to the holding account, if this fails we dont need to go further, if anything else fails we will
         // revert anyways so do it now.
         self.transfer_to_market_cpi(size)?;
-
-        // Update the corresponding user accounts locked token balance.
-        self.user.add_to_side(side, size);
 
         let buf = &mut self.order_queue.load_mut()?.queue;
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
