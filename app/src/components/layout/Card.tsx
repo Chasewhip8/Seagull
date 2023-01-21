@@ -12,7 +12,7 @@ const Card = (props: Props) => {
     <div
       className={classNames(
         props.className,
-        "divide-y divide-gray-200 rounded-lg bg-white shadow-lg"
+        "divide-y divide-gray-200 rounded-lg bg-white shadow-lg overflow-hidden"
       )}
     >
       <div className="px-4 py-5 sm:px-6">{props.header}</div>

@@ -9,10 +9,11 @@ type SelectorItem = {
   id: string;
   name: string;
   image: string;
+  details: string;
 };
 
 type Props = {
-  className: string;
+  className?: string;
   label?: string;
   items: SelectorItem[];
 };
@@ -44,8 +45,11 @@ function Selector(props: Props) {
                     alt=""
                     className="flex-shrink-0 rounded-full"
                   />
-                  <span className="ml-3 block truncate">
-                    {selected ? selected.name : null}
+                  <span className="ml-3 inline-flex w-full truncate">
+                    <span className="truncate">{selected.name}</span>
+                    <span className="ml-2 truncate text-gray-500">
+                      {selected.details}
+                    </span>
                   </span>
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
