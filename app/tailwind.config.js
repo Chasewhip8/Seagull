@@ -4,12 +4,8 @@ module.exports = {
   darkMode: "media",
   theme: {
     extend: {
-      colors: {
-
-      }
-    }
+      colors: {},
+    },
   },
-  plugins: [
-    require("@tailwindcss/typography")
-  ]
-}
+  plugins: [require("@tailwindcss/typography"), require("@tailwindcss/forms")],
+};
