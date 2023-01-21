@@ -1,20 +1,19 @@
 import * as anchor from "@project-serum/anchor";
-import { SeagullMarketProvider } from "./api";
+import { BN, Provider } from "@project-serum/anchor";
 import { IDL, Seagull } from "./seagull_spot_v1";
 import { Connection, PublicKey, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
-import { EndPoint, Market, Side, User } from "./types";
-import { BN, Provider } from "@project-serum/anchor";
+import { Market, Side, User } from "./types";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { U64_MAX_BN } from "./constants";
 import { findAssociatedTokenAddress, getSideFromKey } from "./utils";
+import { SeagullMarketProvider } from "./api";
+import { randomBytes } from "crypto";
 
 export class SeagullSocks extends SeagullMarketProvider<Seagull> {
     public constructor(
         connection: Connection,
-        programId: anchor.web3.PublicKey,
-        cluster: EndPoint
+        programId: anchor.web3.PublicKey
     ) {
-        super(connection, programId, cluster);
+        super(connection, programId);
     }
 
     createProgram(programId: anchor.web3.PublicKey, provider: Provider) {
@@ -45,7 +44,7 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
     initUser(
         authority: PublicKey,
         market: Market,
-        user_id: BN = new BN(U64_MAX_BN.muln(Math.random()))
+        user_id: BN = new BN(randomBytes(8))
     ) {
         return this.program.methods
             .initUser(user_id)
@@ -77,7 +76,7 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
                 user: user.publicKey,
                 userSideAccount: assetAccount,
                 sideMint: sideMintAddress,
-                sideHoldingAccount:sideHoldingAccount,
+                sideHoldingAccount: sideHoldingAccount,
                 orderQueue: market.orderQueue,
                 market: market.publicKey,
                 tokenProgram: TOKEN_PROGRAM_ID,

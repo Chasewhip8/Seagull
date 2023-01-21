@@ -1,12 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { BN } from "@project-serum/anchor";
 
-export enum EndPoint {
-    main = "mainnet-beta",
-    dev = "devnet",
-    local = "localnet"
-}
-
 export type AccountWithKey<T> = T & { publicKey: PublicKey };
 
 export type TypedKeyMap<K extends string, V> = { [k in K]: V };

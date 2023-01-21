@@ -1,16 +1,21 @@
 import * as anchor from "@project-serum/anchor";
 
-import { AnchorProvider, Idl, Program, Provider } from "@project-serum/anchor";
-import { Connection, PublicKey, sendAndConfirmTransaction, Transaction, TransactionInstruction } from "@solana/web3.js";
-import { EndPoint } from "./types";
+import { AnchorProvider, BN, Idl, Program, Provider } from "@project-serum/anchor";
+import {
+    Connection,
+    PublicKey,
+    sendAndConfirmTransaction,
+    Transaction,
+    TransactionInstruction,
+    TransactionSignature
+} from "@solana/web3.js";
+import { Market, Side, User } from "./types";
 
 export abstract class SeagullMarketProvider<T extends Idl> {
     private readonly _connection: Connection;
     private readonly _program: anchor.Program<T>;
-    private readonly _cluster: EndPoint;
 
-    protected constructor(connection: Connection, programId: anchor.web3.PublicKey, cluster: EndPoint) {
-        this._cluster = cluster;
+    protected constructor(connection: Connection, programId: anchor.web3.PublicKey) {
         this._connection = connection;
         this._program = this.createProgram(
             programId,
@@ -25,26 +30,26 @@ export abstract class SeagullMarketProvider<T extends Idl> {
                         return Promise.reject();
                     }
                 },
-                {commitment: connection.commitment}
+                { commitment: connection.commitment }
             )
         );
     }
 
-    private async sendTransactionAndConfirm(
-        signers: anchor.web3.Signer[],
-        instruction: TransactionInstruction[],
-        confirmOptions?: anchor.web3.ConfirmOptions
-    ): Promise<anchor.web3.TransactionSignature> {
-        const sendConfig = confirmOptions ?? {commitment: this._connection.commitment};
-
+    public async sendTransaction<ARGS extends any[]>(
+        keypair: anchor.web3.Signer,
+        sendConfig: anchor.web3.ConfirmOptions,
+        instructionFunction: (...args: ARGS) => Promise<TransactionInstruction>,
+        ...args: ARGS
+    ): Promise<TransactionSignature> {
+        const ix: TransactionInstruction = await instructionFunction.apply(null, args);
         const transaction = new Transaction({
-            feePayer: signers[0].publicKey,
-            ...(await this._connection.getLatestBlockhash(sendConfig.commitment))
+            feePayer: keypair.publicKey,
+            ...await this.connection.getLatestBlockhash(sendConfig.commitment)
         });
-        transaction.add(...instruction);
-        transaction.sign(...signers);
+        transaction.add(ix);
+        transaction.sign(keypair);
 
-        return sendAndConfirmTransaction(this._connection, transaction, signers, sendConfig);
+        return sendAndConfirmTransaction(this.connection, transaction, [keypair], sendConfig);
     }
 
     get connection(): Connection {
@@ -55,9 +60,57 @@ export abstract class SeagullMarketProvider<T extends Idl> {
         return this._program;
     }
 
-    get cluster(): EndPoint {
-        return this._cluster;
-    }
+    public abstract createProgram(programId: PublicKey, provider: Provider): Program<T>;
 
-    abstract createProgram(programId: anchor.web3.PublicKey, provider: Provider): anchor.Program<T>;
+    public abstract initMarket(
+        payer: PublicKey,
+        quoteMint: PublicKey,
+        baseMint: PublicKey,
+        quoteHoldingAccount: PublicKey,
+        baseHoldingAccount: PublicKey,
+    ): Promise<TransactionInstruction>;
+
+    public abstract initUser(
+        authority: PublicKey,
+        market: Market,
+        user_id: BN
+    ): Promise<TransactionInstruction>;
+
+    public abstract placeOrder(
+        side: Side,
+        amount: BN,
+        lowest_price: BN,
+        a_end: BN,
+        market: Market,
+        user: User
+    ): Promise<TransactionInstruction>;
+
+    public abstract cancelOrder(
+        order_id: BN,
+        market: Market,
+        user: User
+    ): Promise<TransactionInstruction>;
+
+    public abstract settleOrder(
+        order_id: BN,
+        market: Market,
+        user: User,
+        filler: User,
+        quoteHoldingAccount: PublicKey,
+        baseHoldingAccount: PublicKey,
+    ): Promise<TransactionInstruction>;
+
+    public abstract fillOrder(
+        side: Side,
+        max_size: BN,
+        price: BN,
+        expire_slot: BN,
+        market: Market,
+        filler: User,
+    ): Promise<TransactionInstruction>;
+
+    public abstract claimUnsettled(
+        market: Market,
+        user: User,
+    ): Promise<TransactionInstruction>;
 }

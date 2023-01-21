@@ -18,23 +18,6 @@ import {
     TokenInstruction
 } from "@solana/spl-token";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
-import BN from "bn.js";
-
-async function sendAndConfirmTransaction(signers: Signer[], ...instructions: TransactionInstruction[]){
-    const blockHash = await anchor.getProvider().connection.getLatestBlockhash();
-    const tx = new Transaction({
-        blockhash: blockHash.blockhash,
-        lastValidBlockHeight: blockHash.lastValidBlockHeight,
-    }).add(...instructions);
-    return anchor.getProvider().sendAndConfirm(
-        tx,
-        signers,
-        {
-            commitment: "finalized",
-            skipPreflight: true
-        }
-    )
-}
 
 async function waitForConfirm(connection: Connection, ...txs: string[]){
     for (const tx of txs){
