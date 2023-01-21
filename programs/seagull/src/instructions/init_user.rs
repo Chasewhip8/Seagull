@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::constants::{ID_RESERVED_SIDE_BIT, NULL_FILLER};
 
-use crate::pda::{User};
+use crate::pda::{Market, User};
 
 #[derive(Accounts)]
 #[instruction(user_id: u64)]
@@ -15,11 +15,13 @@ pub struct InitUser<'info> {
         space = User::LEN + 8,
         seeds = [
             b"User".as_ref(),
+            market.key().as_ref(),
             user_id.to_le_bytes().as_ref()
         ],
         bump
     )]
     user: Box<Account<'info, User>>,
+    market: Box<Account<'info, Market>>,
 
     system_program: Program<'info, System>
 }

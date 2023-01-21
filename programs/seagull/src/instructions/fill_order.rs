@@ -14,6 +14,9 @@ use crate::error::SeagullError;
 #[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64)]
 pub struct FillOrder<'info> {
     authority: Signer<'info>,
+    
+    #[account(mut)]
+    filler: Box<Account<'info, User>>,
 
     #[account(mut)]
     filler_side_account: Box<Account<'info, TokenAccount>>, // Mint is enforced to be the correct side in validation below!
@@ -29,9 +32,6 @@ pub struct FillOrder<'info> {
 
     #[account(mut)]
     order_queue: AccountLoader<'info, OrderQueue>,
-
-    #[account(mut)]
-    filler: Box<Account<'info, User>>,
 
     token_program: Program<'info, Token>,
     clock: Sysvar<'info, Clock>

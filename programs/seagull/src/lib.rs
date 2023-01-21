@@ -25,7 +25,7 @@ pub mod seagull {
     }
 
     #[access_control(ctx.accounts.validate(user_id))]
-    pub fn init_filler(
+    pub fn init_user(
         ctx: Context<InitUser>,
         user_id: u64
     ) -> Result<()> {

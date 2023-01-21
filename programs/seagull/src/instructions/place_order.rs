@@ -11,7 +11,7 @@ use crate::error::SeagullError;
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
-#[instruction(user_id: u64, size: u64, side: Side, lowest_price: u64, a_end: u64)]
+#[instruction(size: u64, side: Side, lowest_price: u64, a_end: u64)]
 pub struct PlaceOrder<'info> {
     authority: Signer<'info>,
 
@@ -19,16 +19,16 @@ pub struct PlaceOrder<'info> {
     user: Box<Account<'info, User>>,
 
     #[account(
-    mut,
-    token::authority = authority,
-    token::mint = side_mint
+        mut,
+        token::authority = authority,
+        token::mint = side_mint
     )]
     user_side_account: Box<Account<'info, TokenAccount>>, // Mint is enforced to be the correct side in validation below!
     side_mint: Box<Account<'info, Mint>>,
 
     #[account(
-    mut,
-    token::mint = side_mint
+        mut,
+        token::mint = side_mint
     )]
     side_holding_account: Box<Account<'info, TokenAccount>>, // Account inside of the market struct to hold assets that are locked
 
