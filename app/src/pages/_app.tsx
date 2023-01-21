@@ -19,15 +19,14 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
         <meta name="description" content="Seagull Finance" />
       </Head>
 
-      <Component {...pageProps} />
-
-      {/* <Provider store={store}> */}
-      {/* <PersistGate persistor={persistor}> */}
-      {/* <AppProviders> */}
-      {/* <Notifications /> */}
-      {/* </AppProviders> */}
-      {/* </PersistGate> */}
-      {/* </Provider> */}
+      <Provider store={store}>
+        <PersistGate persistor={persistor}>
+          <AppProviders>
+            <Notifications />
+            <Component {...pageProps} />
+          </AppProviders>
+        </PersistGate>
+      </Provider>
     </>
   );
 };
