@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { removeNotification, selectNotifications } from "../stores/reducers/notificationReducer";
-import { NotificationType } from "../models/types";
+import { ClusterConfig, NotificationType } from "../models/types";
 import { selectClusterConfig } from "../stores/reducers/configReducer";
 import { WrappedImage } from "./common/WrappedImage";
 import { useAppDispatch, useAppSelector } from "../hooks/common";
+import { PLACEHOLDER } from "../utils/images";
 
 const NotificationList = () => {
     const notifications = useAppSelector(selectNotifications);
@@ -23,7 +24,7 @@ const NotificationList = () => {
                         description={notification.description}
                         txId={notification.txId}
                         timeout={notification.timeout}
-                        network={clusterConfig?.networkType}
+                        cluster={clusterConfig}
                         onHide={() => dispatch(removeNotification(notification))}
                     />
                 ))}
@@ -32,13 +33,13 @@ const NotificationList = () => {
     );
 }
 
-const Notification = ({ type, message, description, txId, timeout, network, onHide }: {
+const Notification = ({ type, message, description, txId, timeout, cluster, onHide }: {
     type: NotificationType,
     message: string,
     description: string,
     txId: string,
     timeout: number,
-    network: EndPoint,
+    cluster: ClusterConfig,
     onHide: () => {}
 }) => {
     useEffect(() => {
@@ -59,10 +60,10 @@ const Notification = ({ type, message, description, txId, timeout, network, onHi
                 <div className={`flex items-center`}>
                     <div className={`flex-shrink-0`}>
                         {type == 'success' ? (
-                            <WrappedImage src={ICON_CHECKMARK} height={32} width={32} alt={""}/>
+                            <WrappedImage src={PLACEHOLDER} height={32} width={32} alt={""}/>
                         ) : null}
-                        {type === 'info' && <WrappedImage src={ICON_INFO} height={32} width={32} alt={""}/>}
-                        {type === 'error' && <WrappedImage src={ICON_EXCLAMATION} height={32} width={32} alt={""}/>}
+                        {type === 'info' && <WrappedImage src={PLACEHOLDER} height={32} width={32} alt={""}/>}
+                        {type === 'error' && <WrappedImage src={PLACEHOLDER} height={32} width={32} alt={""}/>}
                     </div>
                     <div className={`ml-2 w-0 flex-1`}>
                         <div className={`font-bold text-fgd-1`}>{message}</div>
@@ -72,7 +73,7 @@ const Notification = ({ type, message, description, txId, timeout, network, onHi
                         {txId ? (
                             <div className="flex flex-row">
                                 <a
-                                    href={'https://explorer.solana.com/tx/' + txId + `?cluster=` + network}
+                                    href={'https://explorer.solana.com/tx/' + txId + `?cluster=` + cluster.walletAdapterNetwork}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="flex flex-row underline text-green"
@@ -97,7 +98,7 @@ const Notification = ({ type, message, description, txId, timeout, network, onHi
                             className={`bg-bkg-2 default-transition rounded-md inline-flex text-fgd-3 hover:text-fgd-4 focus:outline-none`}
                         >
                             <span className={`sr-only`}>Close</span>
-                            <WrappedImage src={ICON_CANCEL} height={20} width={20} alt={""}/>
+                            <WrappedImage src={PLACEHOLDER} height={20} width={20} alt={""}/>
                         </button>
                     </div>
                 </div>
