@@ -1,15 +1,16 @@
-import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, current, ThunkDispatch } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from "../store";
 import {
     BalanceDataMap,
     PendingTransaction,
     signMultiplePendingTransactions,
 } from "../../utils/transaction/PendingTransaction";
-import { notify } from "../../utils/notifications";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { GetTokenAccountsByOwnerConfig, PublicKey } from "@solana/web3.js";
 import { findAssociatedTokenAddressSync } from "../../utils/solana";
 import { WRAPPED_SOL_MINT } from "../../models/types";
+import { notify } from "../../utils/notifications";
+import App from "next/app";
 
 interface AccountData {
     account?: string
@@ -57,11 +58,11 @@ export const addTransaction = createAsyncThunk<Transaction,
             await transaction.signTransaction(connection, wallet);
 
             if (onComplete){
-                onComplete(dispatch);
+                onComplete(dispatch as AppDispatch);
             }
             return transaction;
         } catch (error) {
-            notify({ type: 'error', message: `Transaction failed to sign!`, description: transaction.description });
+            notify({ type: 'error', message: `Transaction failed to sign!`, description: transaction.description }, dispatch as AppDispatch);
             console.log("Transaction Failed: " + error?.message);
             throw error;
         }
@@ -82,12 +83,12 @@ export const addTransactions = createAsyncThunk<Transaction[],
             await signMultiplePendingTransactions(transactions, wallet, connection);
 
             if (onComplete){
-                onComplete(dispatch);
+                onComplete(dispatch as AppDispatch);
             }
             return transactions;
         } catch (error) {
             notify({ type: 'error', message: `Transactions failed to sign!`,
-                description: transactions[0].description + "...(" + (transactions.length - 1) + " more)"});
+                description: transactions[0].description + "...(" + (transactions.length - 1) + " more)"}, dispatch as AppDispatch);
             console.log("Transaction Failed: " + error?.message);
             throw error;
         }
@@ -113,14 +114,14 @@ export const sendTransaction = createAsyncThunk<void,
                 message: 'Transaction successful!',
                 description: pendingTransaction.description,
                 txId: signature
-            }, dispatch);
+            }, dispatch as AppDispatch);
         } catch (error) {
             notify({
                 type: 'error',
                 message: `Transaction failed and reverted queue!`,
                 description: pendingTransaction.description,
                 txId: signature
-            }, dispatch);
+            }, dispatch as AppDispatch);
             console.log("Transaction failed while sending: " + error?.message);
             throw error;
         }

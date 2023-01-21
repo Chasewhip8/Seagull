@@ -3,17 +3,16 @@ import { ClusterConfig } from "../models/types";
 import configReducer, { resetConfigState } from "./reducers/configReducer";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import notificationReducer from "./reducers/notificationReducer";
-import userDataReducer, { resetUserState } from './reducers/userDataReducer';
 import interfaceReducer from './reducers/interfaceReducer';
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { PersistConfig } from "redux-persist/es/types";
 import persistentReducer, { PersistentState } from "./reducers/persistentReducer";
 import externalDataReducer, {
-    fetchMarketPrices,
     loadTokenList,
     resetExternalState
 } from "./reducers/externalDataReducer";
+import userDataReducer from "./reducers/userDataReducer";
 
 const persistConfig: PersistConfig<any> = {
     key: 'root',
@@ -24,9 +23,9 @@ export const store = configureStore({
     reducer: {
         config: configReducer,
         notification: notificationReducer,
-        userData: userDataReducer,
         externalData: externalDataReducer,
         interface: interfaceReducer,
+        userData: userDataReducer,
         persist: persistReducer<PersistentState>(persistConfig, persistentReducer)
     },
     // TODO REMOVE THIS AND FIX THE UNDERLYING ISSUE
@@ -40,7 +39,6 @@ export const persistor = persistStore(store);
 
 export const initialLoadStore = () => async (dispatch) => {
     await dispatch(loadTokenList());
-    await dispatch(fetchMarketPrices());
 }
 
 export const resetStore = (
@@ -58,7 +56,6 @@ export const resetStore = (
 
     await Promise.all([
         dispatch(resetConfigState({ cluster, wallet })),
-        dispatch(resetUserState()),
         dispatch(resetExternalState()),
         dispatch(initialLoadStore())
     ]);
