@@ -10,7 +10,7 @@ export function getKey(price: BN, side: Side, user_id: BN): BN {
 }
 
 export function getSideBit(side: Side): BN {
-    return side == MarketSide.Buy ? ID_RESERVED_SIDE_BIT : BN_0; // TODO test this!
+    return "buy" in side ? ID_RESERVED_SIDE_BIT : BN_0; // TODO test this! MarketSide.Buy
 }
 
 export function getPriceFromKey(key: BN): BN {
@@ -38,13 +38,4 @@ export function findAssociatedTokenAddress(
         ],
         ASSOCIATED_PROGRAM_ID
     )[0];
-}
-
-export function findMultipleAssociatedTokenAddress(
-    walletAddress: PublicKey,
-    ...tokenMintAddressList: PublicKey[]
-): PublicKey[] {
-    return tokenMintAddressList.map((tokenMint) =>
-        findAssociatedTokenAddress(walletAddress, tokenMint)
-    );
 }
