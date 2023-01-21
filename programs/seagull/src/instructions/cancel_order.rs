@@ -83,6 +83,8 @@ impl<'info> CancelOrder<'info> {
         }
 
         self.transfer_from_market_cpi(order.size)?; // Refund the user!
+        self.user.remove_from_side(order.size, order_side);
+
         order_queue.remove(&order_id); // Remove it from the queue to prevent duplicate redeems
 
         Ok(())

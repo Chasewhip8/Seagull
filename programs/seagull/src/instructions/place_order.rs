@@ -4,7 +4,7 @@ use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
-use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T};
+use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T, BACKSTOP_LENGTH, MAX_ORDERS};
 
 use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, User};
 use crate::error::SeagullError;
@@ -19,16 +19,16 @@ pub struct PlaceOrder<'info> {
     user: Box<Account<'info, User>>,
 
     #[account(
-        mut,
-        token::authority = authority,
-        token::mint = side_mint
+    mut,
+    token::authority = authority,
+    token::mint = side_mint
     )]
     user_side_account: Box<Account<'info, TokenAccount>>, // Mint is enforced to be the correct side in validation below!
     side_mint: Box<Account<'info, Mint>>,
 
     #[account(
-        mut,
-        token::mint = side_mint
+    mut,
+    token::mint = side_mint
     )]
     side_holding_account: Box<Account<'info, TokenAccount>>, // Account inside of the market struct to hold assets that are locked
 
@@ -71,6 +71,8 @@ impl<'info> PlaceOrder<'info> {
         // revert anyways so do it now.
         self.transfer_to_market_cpi(size)?;
 
+        self.user.add_to_side(size, side);
+
         let buf = &mut self.order_queue.load_mut()?.queue;
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
         let order_key = OrderInfo::get_key(lowest_price, side, self.user.user_id);
@@ -82,13 +84,29 @@ impl<'info> PlaceOrder<'info> {
             }
 
             existing_order.size += size;
-        } else {
-            // An existing order matching the price does not exist! Lets insert one.
-            let order = OrderInfo::from(size, a_end);
-            let insert_node = order_queue.insert(order_key, order);
-            if insert_node.is_none() {
+            return Ok(());
+        }
+
+        if order_queue.len() == MAX_ORDERS {
+            let mut order_key: Option<u128> = None;
+            for (key, order) in order_queue.iter_mut() {
+                if order.a_end + BACKSTOP_LENGTH <= self.clock.slot {
+                    order_key = Some(*key);
+                }
+            }
+
+            if let Some(order_key) = order_key {
+                order_queue.remove(&order_key);
+            } else {
                 return Err(error!(SeagullError::OrderQueueFull));
             }
+        }
+
+        // An existing order matching the price does not exist! Lets insert one.
+        let order = OrderInfo::from(size, a_end);
+        let insert_node = order_queue.insert(order_key, order);
+        if insert_node.is_none() {
+            return Err(error!(SeagullError::OrderQueueFull));
         }
 
         Ok(())

@@ -69,4 +69,11 @@ pub mod seagull {
     ) -> Result<()> {
         ctx.accounts.handle(order_id)
     }
+
+    #[access_control(ctx.accounts.validate())]
+    pub fn claim_unsettled(
+        ctx: Context<ClaimUnsettled>
+    ) -> Result<()> {
+        ctx.accounts.handle()
+    }
 }

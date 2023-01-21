@@ -113,6 +113,9 @@ impl<'info> SettleOrder<'info> {
         self.transfer_from_market_cpi(false, user_receive_amount, order_side)?;
         self.transfer_from_market_cpi(true, filler_receive_amount, order_side)?;
 
+        // Remove the outstanding deposit we ticketed.
+        self.order_user.remove_from_side(size, order_side);
+
         order_queue.remove(&order_id); // Remove the order to prevent duplicate settles and clear the queue
 
         Ok(())
@@ -121,20 +124,19 @@ impl<'info> SettleOrder<'info> {
     fn transfer_from_market_cpi(&self, is_filler: bool, amount: u64, order_side: Side) -> ProgramResult {
         let (
             mint,
-            source_account,
-            destination_account
+            source_account
         ) = match order_side {
             Buy => (
                 &self.base_mint,
-                &self.base_holding_account,
-                if is_filler { &self.order_filler_account } else { &self.order_user_account }
+                &self.base_holding_account
             ),
             Sell => (
                 &self.quote_mint,
-                &self.quote_holding_account,
-                if is_filler { &self.order_filler_account } else { &self.order_user_account }
+                &self.quote_holding_account
             )
         };
+
+        let destination_account = if is_filler { &self.order_filler_account } else { &self.order_user_account };
 
         invoke_signed(
             &transfer_checked(
