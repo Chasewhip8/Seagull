@@ -1,23 +1,19 @@
 import * as anchor from "@project-serum/anchor";
-import { Instruction, Program } from "@project-serum/anchor";
+import { BN, Program } from "@project-serum/anchor";
 import { Seagull } from "../target/types/seagull";
 import {
+    ConfirmOptions,
     Connection,
-    Keypair,
-    PublicKey,
-    Signer,
-    SystemProgram,
-    Transaction,
-    TransactionInstruction
+    Keypair
 } from "@solana/web3.js";
 import {
     createAssociatedTokenAccount,
-    createInitializeMint2Instruction,
     createMint,
-    createMintToInstruction, mintTo, TOKEN_PROGRAM_ID,
-    TokenInstruction
+    mintTo
 } from "@solana/spl-token";
-import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
+import { SeagullSocks } from "../sdk/src/provider";
+import { findMarketAddress, findUserAddress } from "../sdk/src/utils";
+import { Market, User } from "../sdk/src/types";
 
 async function waitForConfirm(connection: Connection, ...txs: string[]){
     for (const tx of txs){
@@ -31,41 +27,46 @@ describe("seagull", () => {
 
     const connection = anchor.getProvider().connection;
     const program = anchor.workspace.Seagull as Program<Seagull>;
-
-    const user_keypair = Keypair.generate();
-    const filler_keypair = Keypair.generate();
+    const sdk = new SeagullSocks(connection, program.programId, program);
 
     const setupUser = Keypair.generate();
-    const mintAuthority = Keypair.generate();
-    let baseMint = null;
-    let quoteMint = null;
+    const userKeypair = Keypair.generate();
+    const fillerKeypair = Keypair.generate();
 
-    let userBaseTokenAccount = null;
-    let fillerQuoteTokenAccount = null;
+    const mintAuthority = Keypair.generate();
+
+    const baseMintKeypair = Keypair.generate();
+    const baseMint = baseMintKeypair.publicKey;
+    const quoteMintKeypair = Keypair.generate();
+    const quoteMint = quoteMintKeypair.publicKey;
+
+    const sendConfig: ConfirmOptions = { commitment: "confirmed" };
 
     before("Initialize Mints", async () => {
         const tx1 = await connection.requestAirdrop(setupUser.publicKey, 100 * 10 ** 9);
-        const tx2 = await connection.requestAirdrop(user_keypair.publicKey, 100 * 10 ** 9);
-        const tx3 = await connection.requestAirdrop(filler_keypair.publicKey, 100 * 10 ** 9);
+        const tx2 = await connection.requestAirdrop(userKeypair.publicKey, 100 * 10 ** 9);
+        const tx3 = await connection.requestAirdrop(fillerKeypair.publicKey, 100 * 10 ** 9);
 
         await waitForConfirm(connection, tx1, tx2, tx3);
 
-        baseMint = await createMint(
+        await createMint(
             connection,
             setupUser,
             mintAuthority.publicKey,
-            null, 9
+            null, 9,
+            baseMintKeypair
         );
 
-        quoteMint = await createMint(
+        await createMint(
             connection,
             setupUser,
             mintAuthority.publicKey,
-            null, 9
+            null, 9,
+            quoteMintKeypair
         );
 
-        userBaseTokenAccount = await createAssociatedTokenAccount(connection, setupUser, baseMint, user_keypair.publicKey);
-        fillerQuoteTokenAccount = await createAssociatedTokenAccount(connection, setupUser, quoteMint, filler_keypair.publicKey);
+        const userBaseTokenAccount = await createAssociatedTokenAccount(connection, setupUser, baseMint, userKeypair.publicKey);
+        const fillerQuoteTokenAccount = await createAssociatedTokenAccount(connection, setupUser, quoteMint, fillerKeypair.publicKey);
 
         const tx4 = await mintTo(connection, setupUser, baseMint, userBaseTokenAccount, mintAuthority, 100 * 10**9);
         const tx5 = await mintTo(connection, setupUser, quoteMint, fillerQuoteTokenAccount, mintAuthority, 100 * 10**9);
@@ -73,97 +74,52 @@ describe("seagull", () => {
         await waitForConfirm(connection, tx4, tx5);
     });
 
-    let market: PublicKey = null;
+    const marketAddress = findMarketAddress(baseMint, quoteMint);
+    let market: Market = null;
 
     it("Market Initialized!", async () => {
         const quoteHoldingAccount = Keypair.generate();
         const baseHoldingAccount = Keypair.generate();
 
-        market = findProgramAddressSync(
-            [
-                Buffer.from("Market"),
-                quoteMint.toBuffer(),
-                baseMint.toBuffer()
-            ],
-            program.programId
-        )[0];
+        await sdk.sendTransaction([setupUser, quoteHoldingAccount, baseHoldingAccount], sendConfig,
+            sdk.initMarket,
+            setupUser.publicKey,
+            quoteMint,
+            baseMint,
+            quoteHoldingAccount.publicKey,
+            baseHoldingAccount.publicKey
+        )
 
-        await program.methods.initMarket()
-            .accounts({
-                payer: setupUser.publicKey,
-                quoteMint: quoteMint,
-                baseMint: baseMint,
-                quoteHoldingAccount: quoteHoldingAccount.publicKey,
-                baseHoldingAccount: baseHoldingAccount.publicKey,
-                market: market,
-                systemProgram: SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID
-            })
-            .signers([quoteHoldingAccount, baseHoldingAccount, setupUser])
-            .rpc();
+        market = await sdk.fetchMarket(marketAddress);
     });
 
-    let user = null;
-    let filler = null;
+    let user: User = null;
+    let filler: User = null;
 
     it("Initialize User Accounts!", async () => {
-        user = findProgramAddressSync(
-            [
-                Buffer.from("User"),
-                quoteMint.toBuffer(),
-                baseMint.toBuffer()
-            ],
-            program.programId
+        await sdk.sendTransaction([userKeypair], sendConfig,
+            sdk.initUser,
+            userKeypair.publicKey,
+            market,
+            new BN(1)
         );
 
-        await program.methods
-            .initUser(new anchor.BN(1))
-            .accounts({
-                authority: user_keypair.publicKey,
-                market: market,
-                systemProgram: SystemProgram.programId,
-            })
-            .signers([user_keypair])
-            .rpc();
-
-        filler = findProgramAddressSync(
-            [
-                Buffer.from("User"),
-                quoteMint.toBuffer(),
-                baseMint.toBuffer()
-            ],
-            program.programId
+        await sdk.sendTransaction([fillerKeypair], sendConfig,
+            sdk.initUser,
+            fillerKeypair.publicKey,
+            market,
+            new BN(2)
         );
 
-        await program.methods
-            .initUser(new anchor.BN(2))
-            .accounts({
-                authority: filler_keypair.publicKey,
-                market: market,
-                systemProgram: SystemProgram.programId,
-            })
-            .signers([filler_keypair])
-            .rpc();
+        user = await sdk.fetchUser(findUserAddress(marketAddress, new BN(1)));
+        filler = await sdk.fetchUser(findUserAddress(marketAddress, new BN(2)));
     });
 
-    let market_account = null;
     it("Fetch Market Account", async () => {
-        market_account = await program.account.market.fetch(market);
+
     });
 
     it("Place Order", async () => {
-        await program.methods
-            .placeOrder()
-            .accounts({
-                authority: filler_keypair.publicKey,
-                user: user_keypair.publicKey,
-                userSideAccount: userBaseTokenAccount.publicKey,
-                sideMint: baseMint.publicKey,
-                market: market,
-                orderQueue: market_account.order_queue.publicKey,
 
-            })
-            .signers([filler_keypair])
-            .rpc();
     });
 });

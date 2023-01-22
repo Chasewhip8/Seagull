@@ -1,23 +1,44 @@
 import * as anchor from "@project-serum/anchor";
-import { BN, Provider } from "@project-serum/anchor";
+import { BN, Program, Provider } from "@project-serum/anchor";
 import { IDL, Seagull } from "./seagull_spot_v1";
-import { Connection, PublicKey, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import { Commitment, Connection, PublicKey, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 import { Market, Side, User } from "./types";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { findAssociatedTokenAddress, getSideFromKey } from "./utils";
+import { findAssociatedTokenAddress, findUserAddress, getSideFromKey } from "./utils";
 import { SeagullMarketProvider } from "./api";
 import { randomBytes } from "crypto";
 
 export class SeagullSocks extends SeagullMarketProvider<Seagull> {
     public constructor(
         connection: Connection,
-        programId: anchor.web3.PublicKey
+        programId: PublicKey,
+        program?: Program<Seagull>
     ) {
-        super(connection, programId);
+        super(connection, programId, program);
     }
 
-    createProgram(programId: anchor.web3.PublicKey, provider: Provider) {
+    createProgram(programId: PublicKey, provider: Provider) {
         return new anchor.Program(IDL, programId, provider);
+    }
+
+    async fetchUser(
+        address: PublicKey,
+        commitment?: Commitment
+    ): Promise<User> {
+        return {
+            ...(await this.program.account.user.fetch(address, commitment)),
+            publicKey: address
+        };
+    }
+
+    async fetchMarket(
+        address: PublicKey,
+        commitment?: Commitment
+    ): Promise<Market> {
+        return {
+            ...(await this.program.account.market.fetch(address, commitment)),
+            publicKey: address
+        };
     }
 
     initMarket(
@@ -44,13 +65,15 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
     initUser(
         authority: PublicKey,
         market: Market,
-        user_id: BN = new BN(randomBytes(8))
+        user_id: BN = new BN(randomBytes(8)),
+        userAccount: PublicKey = findUserAddress(market.publicKey, user_id)
     ) {
         return this.program.methods
             .initUser(user_id)
             .accounts({
                 authority: authority,
                 market: market.publicKey,
+                user: userAccount,
                 systemProgram: SystemProgram.programId,
             })
             .instruction();

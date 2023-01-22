@@ -2,9 +2,11 @@ import * as anchor from "@project-serum/anchor";
 
 import { AnchorProvider, BN, Idl, Program, Provider } from "@project-serum/anchor";
 import {
+    Commitment,
+    ConfirmOptions,
     Connection,
     PublicKey,
-    sendAndConfirmTransaction,
+    sendAndConfirmTransaction, Signer,
     Transaction,
     TransactionInstruction,
     TransactionSignature
@@ -13,11 +15,11 @@ import { Market, Side, User } from "./types";
 
 export abstract class SeagullMarketProvider<T extends Idl> {
     private readonly _connection: Connection;
-    private readonly _program: anchor.Program<T>;
+    private readonly _program: Program<T>;
 
-    protected constructor(connection: Connection, programId: anchor.web3.PublicKey) {
+    protected constructor(connection: Connection, programId: PublicKey, program?: Program<T>) {
         this._connection = connection;
-        this._program = this.createProgram(
+        this._program = program ?? this.createProgram(
             programId,
             new AnchorProvider(
                 connection,
@@ -36,20 +38,20 @@ export abstract class SeagullMarketProvider<T extends Idl> {
     }
 
     public async sendTransaction<ARGS extends any[]>(
-        keypair: anchor.web3.Signer,
-        sendConfig: anchor.web3.ConfirmOptions,
+        keypair: Signer[],
+        sendConfig: ConfirmOptions,
         instructionFunction: (...args: ARGS) => Promise<TransactionInstruction>,
         ...args: ARGS
     ): Promise<TransactionSignature> {
-        const ix: TransactionInstruction = await instructionFunction.apply(null, args);
+        const ix: TransactionInstruction = await instructionFunction.apply(this, args);
         const transaction = new Transaction({
-            feePayer: keypair.publicKey,
+            feePayer: keypair[0].publicKey,
             ...await this.connection.getLatestBlockhash(sendConfig.commitment)
         });
         transaction.add(ix);
-        transaction.sign(keypair);
+        transaction.sign(...keypair);
 
-        return sendAndConfirmTransaction(this.connection, transaction, [keypair], sendConfig);
+        return sendAndConfirmTransaction(this.connection, transaction, keypair, sendConfig);
     }
 
     get connection(): Connection {
@@ -61,6 +63,16 @@ export abstract class SeagullMarketProvider<T extends Idl> {
     }
 
     public abstract createProgram(programId: PublicKey, provider: Provider): Program<T>;
+
+    public abstract fetchUser(
+        address: PublicKey,
+        commitment?: Commitment
+    ): Promise<User>;
+
+    public abstract fetchMarket(
+        address: PublicKey,
+        commitment?: Commitment
+    ): Promise<Market>;
 
     public abstract initMarket(
         payer: PublicKey,
