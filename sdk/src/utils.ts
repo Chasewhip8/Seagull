@@ -28,6 +28,18 @@ export function getSideFromKey(key: BN): Side {
         ? MarketSide.Sell : MarketSide.Buy;
 }
 
+export function fp32FromNumber(amount: number): BN {
+    return new BN(Math.floor(amount * (2 ** 32)));
+}
+
+export function fp32CalcMinTickSizes(baseDecimals: number): BN {
+    return new BN(1).ishln(32 - baseDecimals)
+}
+
+export function tickAlignFloor(fp32Amount: BN, minTickSize: BN): BN {
+    return fp32Amount.sub(fp32Amount.umod(minTickSize));
+}
+
 export function findAssociatedTokenAddress(
     walletAddress: PublicKey,
     tokenMintAddress: PublicKey

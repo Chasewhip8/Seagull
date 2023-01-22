@@ -30,3 +30,39 @@ export type MarketType = {
     minTickSize: BN,
     bump: number
 }
+
+export type MarketEvent<T> = {
+    data: T,
+    name: string
+}
+
+export type OrderMatchedEvent = {
+    orderId: BN,
+    newFillerId: BN,
+    replacedFilerId: BN
+}
+
+export type OrderRematchFailEvent = {
+    originalOrderId: BN,
+    fillerId: BN
+}
+
+export type OrderPlaceEvent = {
+    orderId: BN,
+    size: BN
+}
+
+export type OrderEditEvent = {
+    orderId: BN,
+    size: BN
+}
+
+export type OrderCancelEvent = {
+    orderId: BN,
+}
+
+export type OrderSettledEvent = {
+    orderId: BN,
+    settledPrice: BN,
+    settledSize: BN
+}

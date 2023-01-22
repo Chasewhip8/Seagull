@@ -225,6 +225,11 @@ export type Seagull = {
           "isSigner": true
         },
         {
+          "name": "filler",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "fillerSideAccount",
           "isMut": true,
           "isSigner": false
@@ -246,11 +251,6 @@ export type Seagull = {
         },
         {
           "name": "orderQueue",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "filler",
           "isMut": true,
           "isSigner": false
         },
@@ -612,20 +612,64 @@ export type Seagull = {
       ]
     },
     {
-      "name": "OrderCompletedEvent",
-      "fields": []
+      "name": "OrderPlaceEvent",
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "size",
+          "type": "u64",
+          "index": false
+        }
+      ]
     },
     {
-      "name": "OrderFinalizedEvent",
-      "fields": []
-    },
-    {
-      "name": "NewOrderEvent",
-      "fields": []
+      "name": "OrderEditEvent",
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "size",
+          "type": "u64",
+          "index": false
+        }
+      ]
     },
     {
       "name": "OrderCancelEvent",
-      "fields": []
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "OrderSettledEvent",
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "settledPrice",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "settledSize",
+          "type": "u64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -889,6 +933,11 @@ export const IDL: Seagull = {
           "isSigner": true
         },
         {
+          "name": "filler",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "fillerSideAccount",
           "isMut": true,
           "isSigner": false
@@ -910,11 +959,6 @@ export const IDL: Seagull = {
         },
         {
           "name": "orderQueue",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "filler",
           "isMut": true,
           "isSigner": false
         },
@@ -1276,20 +1320,64 @@ export const IDL: Seagull = {
       ]
     },
     {
-      "name": "OrderCompletedEvent",
-      "fields": []
+      "name": "OrderPlaceEvent",
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "size",
+          "type": "u64",
+          "index": false
+        }
+      ]
     },
     {
-      "name": "OrderFinalizedEvent",
-      "fields": []
-    },
-    {
-      "name": "NewOrderEvent",
-      "fields": []
+      "name": "OrderEditEvent",
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "size",
+          "type": "u64",
+          "index": false
+        }
+      ]
     },
     {
       "name": "OrderCancelEvent",
-      "fields": []
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "OrderSettledEvent",
+      "fields": [
+        {
+          "name": "orderId",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "settledPrice",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "settledSize",
+          "type": "u64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [

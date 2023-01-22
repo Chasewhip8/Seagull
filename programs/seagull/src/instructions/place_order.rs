@@ -6,6 +6,7 @@ use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
 use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T, BACKSTOP_LENGTH, MAX_ORDERS};
 
+use crate::events::{OrderPlaceEvent, OrderEditEvent, OrderCancelEvent};
 use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, User};
 use crate::error::SeagullError;
 use crate::pda::market::Side;
@@ -84,6 +85,12 @@ impl<'info> PlaceOrder<'info> {
             }
 
             existing_order.size += size;
+
+            emit!(OrderEditEvent {
+                order_id: order_key,
+                size: existing_order.size
+            });
+
             return Ok(());
         }
 
@@ -97,6 +104,10 @@ impl<'info> PlaceOrder<'info> {
 
             if let Some(order_key) = order_key {
                 order_queue.remove(&order_key);
+
+                emit!(OrderCancelEvent {
+                    order_id: order_key
+                })
             } else {
                 return Err(error!(SeagullError::OrderQueueFull));
             }
@@ -108,6 +119,11 @@ impl<'info> PlaceOrder<'info> {
         if insert_node.is_none() {
             return Err(error!(SeagullError::OrderQueueFull));
         }
+
+        emit!(OrderPlaceEvent {
+            order_id: order_key,
+            size: size
+        });
 
         Ok(())
     }

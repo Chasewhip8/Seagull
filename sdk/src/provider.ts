@@ -90,7 +90,7 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
         const [sideMintAddress, sideHoldingAccount] = "buy" in side ?
             [market.quoteMint, market.quoteHoldingAccount] : [market.baseMint, market.baseHoldingAccount];
 
-        const assetAccount = findAssociatedTokenAddress(user.publicKey, sideMintAddress);
+        const assetAccount = findAssociatedTokenAddress(user.authority, sideMintAddress);
 
         return this.program.methods
             .placeOrder(amount, side, lowest_price, a_end)
@@ -139,16 +139,14 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
         order_id: BN,
         market: Market,
         user: User,
-        filler: User,
-        quoteHoldingAccount: PublicKey,
-        baseHoldingAccount: PublicKey,
+        filler: User
     ) {
         const [fillerSideMintAddress, userSideMintAddress] = "buy" in getSideFromKey(order_id) ?
-            [market.quoteMint, market.quoteHoldingAccount]
-            : [market.baseMint, market.baseHoldingAccount];
+            [market.quoteMint, market.baseMint]
+            : [market.baseMint, market.quoteMint];
 
-        const orderUserAccount = findAssociatedTokenAddress(user.publicKey, userSideMintAddress);
-        const orderFillerAccount = findAssociatedTokenAddress(user.publicKey, fillerSideMintAddress);
+        const orderUserAccount = findAssociatedTokenAddress(user.authority, userSideMintAddress);
+        const orderFillerAccount = findAssociatedTokenAddress(filler.authority, fillerSideMintAddress);
 
         return this.program.methods
             .settleOrder(order_id)
@@ -156,8 +154,8 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
                 market: market.publicKey,
                 baseMint: market.baseMint,
                 quoteMint: market.quoteMint,
-                baseHoldingAccount: baseHoldingAccount,
-                quoteHoldingAccount: quoteHoldingAccount,
+                baseHoldingAccount: market.baseHoldingAccount,
+                quoteHoldingAccount: market.quoteHoldingAccount,
                 orderQueue: market.orderQueue,
                 orderUser: user.publicKey,
                 orderUserAccount: orderUserAccount,
@@ -178,7 +176,7 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
         filler: User,
     ) {
         const [sideMintAddress, sideHoldingAccount] = "buy" in side ?
-            [market.baseMint, market.baseHoldingAccount] : [market.quoteMint, market.quoteHoldingAccount];
+             [market.quoteMint, market.quoteHoldingAccount] : [market.baseMint, market.baseHoldingAccount];
 
         const assetAccount = findAssociatedTokenAddress(filler.authority, sideMintAddress);
 
@@ -189,6 +187,8 @@ export class SeagullSocks extends SeagullMarketProvider<Seagull> {
                 filler: filler.publicKey,
                 fillerSideAccount: assetAccount,
                 sideHoldingAccount: sideHoldingAccount,
+                sideMint: sideMintAddress,
+                market: market.publicKey,
                 orderQueue: market.orderQueue,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 clock: SYSVAR_CLOCK_PUBKEY

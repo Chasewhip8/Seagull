@@ -329,6 +329,11 @@ camelcase@^6.0.0, camelcase@^6.3.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.3.0.tgz#5685b95eb209ac9c0c177467778c9c84df58ba9a"
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
+chai-as-promised@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/chai-as-promised/-/chai-as-promised-1.2.0.tgz#5708128df70deb056ff724a434e3769bc68e3636"
+  integrity sha512-h27ODqoayk0Bj0E1E1CBrYdA8+t/6c/g6X2ehM/fn4kbj+lHJ4VEm5fUVEPBmhuilycnK8ZWICqpYrv7dXGODg==
+
 chai@^4.3.4:
   version "4.3.7"
   resolved "https://registry.yarnpkg.com/chai/-/chai-4.3.7.tgz#ec63f6df01829088e8bf55fca839bcd464a8ec51"

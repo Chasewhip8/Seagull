@@ -10,6 +10,7 @@ use crate::error::SeagullError;
 use crate::gen_market_signer_seeds;
 use crate::math::fp32_mul_floor;
 use crate::pda::Side::{Buy, Sell};
+use crate::events::{OrderSettledEvent};
 
 #[derive(Accounts)]
 #[instruction(order_id: u128)]
@@ -116,12 +117,21 @@ impl<'info> SettleOrder<'info> {
         // Remove the outstanding deposit we ticketed.
         self.order_user.remove_from_side(size, order_side);
 
+        emit!(OrderSettledEvent {
+            order_id: order_id,
+            settled_price: order.filler_info.price,
+            settled_size: order.size
+        });
+
         order_queue.remove(&order_id); // Remove the order to prevent duplicate settles and clear the queue
 
         Ok(())
     }
 
     fn transfer_from_market_cpi(&self, is_filler: bool, amount: u64, order_side: Side) -> ProgramResult {
+        let order_side = if is_filler { order_side.get_opposite() } else { order_side };
+        let destination_account = if is_filler { &self.order_filler_account } else { &self.order_user_account };
+
         let (
             mint,
             source_account
@@ -135,8 +145,6 @@ impl<'info> SettleOrder<'info> {
                 &self.quote_holding_account
             )
         };
-
-        let destination_account = if is_filler { &self.order_filler_account } else { &self.order_user_account };
 
         invoke_signed(
             &transfer_checked(

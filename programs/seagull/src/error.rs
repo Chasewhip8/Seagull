@@ -5,6 +5,9 @@ pub enum SeagullError {
     #[msg("Order Queue is full!")]
     OrderQueueFull,
 
+    #[msg("Order Queue is empty!")]
+    OrderQueueEmpty,
+
     #[msg("The order at this price exists and is being filled already!")]
     OrderExistsAndFilled,
 

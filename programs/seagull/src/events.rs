@@ -14,21 +14,25 @@ pub struct OrderRematchFailEvent {
 }
 
 #[event]
-pub struct OrderCompletedEvent {
-
+pub struct OrderPlaceEvent {
+    pub order_id: u128,
+    pub size: u64
 }
 
 #[event]
-pub struct OrderFinalizedEvent {
-
-}
-
-#[event]
-pub struct NewOrderEvent {
-
+pub struct OrderEditEvent {
+    pub order_id: u128,
+    pub size: u64
 }
 
 #[event]
 pub struct OrderCancelEvent {
+    pub order_id: u128,
+}
 
+#[event]
+pub struct OrderSettledEvent {
+    pub order_id: u128,
+    pub settled_price: u64,
+    pub settled_size: u64
 }

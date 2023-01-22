@@ -62,8 +62,7 @@ impl<'info> FillOrder<'info> {
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
 
         if order_queue.len() == 0 {
-            msg!("Match: Order queue empty!");
-            return Ok(());
+            return Err(error!(SeagullError::OrderQueueEmpty));
         }
 
         // Match the order and redistribute others or error.

@@ -138,6 +138,13 @@ impl Side {
         }
     }
 
+    pub fn get_opposite(&self) -> Side {
+        match self {
+            Buy => Sell,
+            Sell => Buy
+        }
+    }
+
     fn from_side_bit(bit: bool) -> Side {
         if bit { Buy } else { Sell }
     }
