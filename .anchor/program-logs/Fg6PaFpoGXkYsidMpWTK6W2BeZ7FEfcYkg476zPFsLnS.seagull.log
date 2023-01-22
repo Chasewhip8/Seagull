@@ -1,0 +1,129 @@
+Streaming transaction logs mentioning Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS. Confirmed commitment
+Transaction executed in slot 13:
+  Signature: 31LSDZWtkJ8m9XZPd2ZScxi8hZbrJoYFBUYD9KNVx3DkUCUZ9LzTk3GWRNmv46DXy2kBykRWeY3v3XibsgmFZJ7i
+  Status: Ok
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: InitMarket
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: InitializeAccount3
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 187152 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: InitializeAccount3
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 175337 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 50859 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS success
+Transaction executed in slot 14:
+  Signature: 5cexdhHMqhCwZygmwrAsBhQHCjML2fo7fKiyLuS5EqhDXt3Pa9PsDJNrcgnvPdDYfbTUzTExJHm2Cv5CHPTdxse6
+  Status: Ok
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: InitUser
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 10869 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS success
+Transaction executed in slot 15:
+  Signature: sAm2Ygj1cVyENQPyM9x9E8rYRRuQadF3cnSQrdHHBp7GYYpEQphqU37y1YQp73LXYi1rqm6Phza4Je1qQPiumH1
+  Status: Ok
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: InitUser
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 16869 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS success
+Transaction executed in slot 16:
+  Signature: 4MVU49LjG4PKmQVhHqyqrWELhLWH5viejfyKQo7dKCoY6FQQvzVrgUZ7FV55bJsyd84piBpE8trk4QkaqpZ16gzZ
+  Status: Ok
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: PlaceOrder
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: TransferChecked
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 6174 of 186126 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program data: gplr3JGyTJQBAAAAAAAAAAAAAAABAAAAAMqaOwAAAAA=
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 22233 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS success
+Transaction executed in slot 17:
+  Signature: E9uMJBFExbXYuc8SdC3c1GsT1qFuN6BmFfo4C3gx2AxwQHH73Ue84iARzunDEnY2SFJfrj9ohzW8pVC4deyXMZe
+  Status: Ok
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: FillOrder
+    Program data: BBs80JQiYEgBAAAAAAAAAAAAAAABAAAAAgAAAAAAAAAAAAAAAAAAAA==
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: TransferChecked
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 6174 of 185658 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 22004 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS success
+Transaction executed in slot 18:
+  Signature: 53Zy27dSK32pAVvfnWQGwxMVDdZJmeGPgrnb91vBcPgv2jLZM9ZySSfaY9TaLYk1jkwSBCW2Kra4kxTJFQJoLaPp
+  Status: Ok
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: FillOrder
+    Program data: BBs80JQiYEgBAAAAAAAAAAAAAAABAAAAAgAAAAAAAAACAAAAAAAAAA==
+    Program data: rT56gkBn82wBAAAAAAAAAAAAAAABAAAAAgAAAAAAAAA=
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: TransferChecked
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 6174 of 184961 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 22701 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS success
+Transaction executed in slot 19:
+  Signature: 521cQwmyHkUZiEaSzTrVNRT6x94pdKWiA3trVoHDzL19riUW4LJNbiQGhw1mscocrDEuTqd4xbKVWTgxGpGoi8Ew
+  Status: Error processing Instruction 0: custom program error: 0x1773
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: FillOrder
+    Program log: AnchorError thrown in programs/seagull/src/instructions/fill_order.rs:116. Error Code: OrderNotMatched. Error Number: 6003. Error Message: Their were no available orders to match the fill to!.
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 13891 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS failed: custom program error: 0x1773
+Transaction executed in slot 20:
+  Signature: 2u7iV9Ec3NwwvD1aaTAAbEkjB8VZeUB54mGRzvF4Y6rLBw82Ya9AKfnhhoJRjj9UA5PZhu6yCxtqyPAgBkVL1RUa
+  Status: Error processing Instruction 0: custom program error: 0x1773
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: FillOrder
+    Program log: AnchorError thrown in programs/seagull/src/instructions/fill_order.rs:116. Error Code: OrderNotMatched. Error Number: 6003. Error Message: Their were no available orders to match the fill to!.
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 13891 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS failed: custom program error: 0x1773
+Transaction executed in slot 21:
+  Signature: 4SgRnWCTcW4ob95G8UHanZPZEzvmhD8fd9r5K9tJGauEPgoQTkihPSTDM7J2wyz83dVSVpAJheFUrJG2es3uSPM7
+  Status: Ok
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: SettleOrder
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: TransferChecked
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 6174 of 180636 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: TransferChecked
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 6174 of 171388 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program data: uaEFUnMqjXIBAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAypo7AAAAAA==
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 36761 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS success
+Transaction executed in slot 22:
+  Signature: 4cEGXEKCJbLkqC45w5SEuqavs2aLycj1ZH63mmjs81neaGaYHdi3vcXqieXhW9zyam4QoqZFnbrDAKrbpAo2mFRk
+  Status: Error processing Instruction 0: custom program error: 0x1771
+  Log Messages:
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS invoke [1]
+    Program log: Instruction: FillOrder
+    Program log: AnchorError thrown in programs/seagull/src/instructions/fill_order.rs:65. Error Code: OrderQueueEmpty. Error Number: 6001. Error Message: Order Queue is empty!.
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS consumed 13477 of 200000 compute units
+    Program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS failed: custom program error: 0x1771
