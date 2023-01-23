@@ -2,6 +2,7 @@ import { ClusterConfig } from "../../../models/types";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { ICON_B_SOL, ICON_BONK, ICON_M_SOL, ICON_SOL } from "../../../utils/images";
 import { clusterApiUrl } from "@solana/web3.js";
+import { SEAGULL_PROGRAM_ID } from "@seagullfinance/seagull";
 
 const DEVNET: ClusterConfig = {
   clusterName: "Devnet",
@@ -43,7 +44,7 @@ const DEVNET: ClusterConfig = {
       address: "testAddress3"
     }
   ],
-  programId: "5m6icMgJpaZoWywACLyRtTrdZ52FUoR6x6iuciKky9J2",
+  programId: SEAGULL_PROGRAM_ID.toBase58(),
   walletAdapterNetwork: WalletAdapterNetwork.Devnet,
   refreshBalanceInterval: 120,
   clusterUrl: clusterApiUrl('devnet'),

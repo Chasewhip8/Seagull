@@ -1,7 +1,7 @@
 import { BN } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 
-export const SEAGULL_PROGRAM_ID = new PublicKey("5m6icMgJpaZoWywACLyRtTrdZ52FUoR6x6iuciKky9J2");
+export const SEAGULL_PROGRAM_ID = new PublicKey("9zXtk38f7dTXtTczP6X675NNHFZkci6RHgontwxoKznd");
 
 export const BN_0 = new BN(0);
 export const U64_MAX_BN = new BN('18446744073709551615');
