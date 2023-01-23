@@ -8,8 +8,8 @@ export let config: Config = {
     fillerUser: null,
     markets: [
         {
-            quoteMint: new PublicKey(""),
-            baseMint: new PublicKey(""),
+            baseMint: new PublicKey("bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1"),
+            quoteMint: new PublicKey("So11111111111111111111111111111111111111112"),
             market: null,
             filler: null
         }

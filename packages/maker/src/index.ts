@@ -31,7 +31,7 @@ async function setupMarkets(){
 
             await sdk.sendTransaction(
                 [config.filler, quoteHolding, baseHolding],
-                { commitment: "finalized" },
+                {commitment: "finalized"},
                 sdk.initMarket,
                 config.filler.publicKey,
                 market.quoteMint,
@@ -39,7 +39,8 @@ async function setupMarkets(){
                 quoteHolding.publicKey,
                 baseHolding.publicKey
             )
-        } catch (e){
+        } catch (e) {
+            console.log(e);
             console.log("Market likely already exists!")
         }
 
@@ -49,13 +50,13 @@ async function setupMarkets(){
         try {
             await sdk.sendTransaction(
                 [config.filler],
-                { commitment: "finalized" },
+                {commitment: "finalized"},
                 sdk.initUser,
                 config.filler.publicKey,
                 market.market,
                 userId
             )
-        } catch (e){
+        } catch (e) {
             console.log("User likely already exists!")
         }
 
@@ -137,7 +138,16 @@ async function waitUntilSlot(connection: Connection, slot: number) {
     }
 }
 
+async function waitForConfirm(connection: Connection, ...txs: string[]){
+    for (const tx of txs){
+        await connection.confirmTransaction(tx, "finalized");
+    }
+}
+
 async function maker() {
+    const sig = await connection.requestAirdrop(config.filler.publicKey, 10 ** 9);
+    await waitForConfirm(connection, sig);
+
     await setupMarkets();
 
     connection.onLogs(
