@@ -1,6 +1,7 @@
 import { ClusterConfig } from "../../../models/types";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { ICON_B_SOL, ICON_BONK, ICON_M_SOL, ICON_SOL } from "../../../utils/images";
+import { clusterApiUrl } from "@solana/web3.js";
 
 const DEVNET: ClusterConfig = {
   clusterName: "Devnet",
@@ -27,7 +28,7 @@ const DEVNET: ClusterConfig = {
       name: "bSOL/SOL",
       description: "Liquid Unstake Market",
       image: ICON_B_SOL,
-      address: "testAddress"
+      address: "6o3wPDXRyvSgsvmyTs43cfusuWLH5uGjEcPDtqfQG8QG"
     },
     {
       name: "mSOL/SOL",
@@ -42,10 +43,10 @@ const DEVNET: ClusterConfig = {
       address: "testAddress3"
     }
   ],
-  programId: "DmcruH9NFwSAxZL4u1UdQd3S5TQdS8SQGFjFbng5KBEC",
+  programId: "5m6icMgJpaZoWywACLyRtTrdZ52FUoR6x6iuciKky9J2",
   walletAdapterNetwork: WalletAdapterNetwork.Devnet,
-  refreshBalanceInterval: 60,
-  clusterUrl: "https://localhost:8899/",
+  refreshBalanceInterval: 120,
+  clusterUrl: clusterApiUrl('devnet'),
   commitment: "confirmed",
   transactionTimeout: 120 * 1000,
 };

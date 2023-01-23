@@ -638,6 +638,11 @@ export type Seagull = {
           "name": "size",
           "type": "u64",
           "index": false
+        },
+        {
+          "name": "aEnd",
+          "type": "u64",
+          "index": false
         }
       ]
     },
@@ -656,6 +661,11 @@ export type Seagull = {
         },
         {
           "name": "size",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "aEnd",
           "type": "u64",
           "index": false
         }
@@ -737,6 +747,11 @@ export type Seagull = {
       "code": 6006,
       "name": "PriceNotTickAligned",
       "msg": "The price is not tick aligned!"
+    },
+    {
+      "code": 6007,
+      "name": "OrderExistsAuctionEndMismatch",
+      "msg": "The order exists and the provided auction end slot is not the same!"
     }
   ]
 };
@@ -1381,6 +1396,11 @@ export const IDL: Seagull = {
           "name": "size",
           "type": "u64",
           "index": false
+        },
+        {
+          "name": "aEnd",
+          "type": "u64",
+          "index": false
         }
       ]
     },
@@ -1399,6 +1419,11 @@ export const IDL: Seagull = {
         },
         {
           "name": "size",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "aEnd",
           "type": "u64",
           "index": false
         }
@@ -1480,6 +1505,11 @@ export const IDL: Seagull = {
       "code": 6006,
       "name": "PriceNotTickAligned",
       "msg": "The price is not tick aligned!"
+    },
+    {
+      "code": 6007,
+      "name": "OrderExistsAuctionEndMismatch",
+      "msg": "The order exists and the provided auction end slot is not the same!"
     }
   ]
 };

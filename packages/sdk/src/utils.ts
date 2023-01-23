@@ -70,7 +70,7 @@ export function findUserAddress(market: PublicKey, user_id: BN){
         [
             Buffer.from("User"),
             market.toBuffer(),
-            user_id.toBuffer("le", 8)
+            user_id.toArrayLike(Buffer, 'le',8)
         ],
         SEAGULL_PROGRAM_ID
     )[0]

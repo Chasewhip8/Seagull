@@ -4,7 +4,8 @@ import { WalletContextConsumer } from "./WalletContextConsumer";
 import { WalletContextProvider } from "./WalletContextProvider";
 import { WindowContextProvider } from "./WindowContextProvider";
 import { RefreshProvider } from "./RefreshProvider";
-import { useAppDispatch } from "../hooks/common";
+import { useAppDispatch, useAppSelector } from "../hooks/common";
+import { selectPendingTransaction, sendTransaction } from "../stores/reducers/userDataReducer";
 
 export const AppProviders: FC<PropsWithChildren> = ({ children }) => {
     const dispatch = useAppDispatch();
@@ -12,6 +13,15 @@ export const AppProviders: FC<PropsWithChildren> = ({ children }) => {
     useEffect(() => {
         dispatch(initialLoadStore());
     }, [dispatch]);
+
+    const pendingTransaction = useAppSelector(selectPendingTransaction);
+    useEffect(() => {
+        if (!pendingTransaction || pendingTransaction.sentTransaction) {
+            return;
+        }
+
+        dispatch(sendTransaction());
+    }, [dispatch, pendingTransaction])
 
     return (
         <WindowContextProvider>

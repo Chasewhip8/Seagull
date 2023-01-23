@@ -22,7 +22,13 @@ type Props<T> = {
 function Selector<T>(props: Props<T>) {
   const { items } = props;
 
-  const [selected, setSelected] = useState<SelectorItem<T>>(items ? items[0] : null);
+  const [selected, setSelected] = useState<SelectorItem<T>>(() => {
+    const defaultItem = items ? items[0] : null;
+    if (props.onChange){
+      props.onChange(defaultItem?.data);
+    }
+    return defaultItem;
+  });
 
   return (
       <div className={props.className}>

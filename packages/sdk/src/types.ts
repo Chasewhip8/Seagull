@@ -56,11 +56,7 @@ export type OrderPlaceEvent = {
     aEnd: BN
 }
 
-export type OrderEditEvent = {
-    market: PublicKey,
-    orderId: BN,
-    size: BN
-}
+export type OrderEditEvent = OrderPlaceEvent;
 
 export type OrderCancelEvent = {
     market: PublicKey,

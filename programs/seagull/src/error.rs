@@ -21,5 +21,8 @@ pub enum SeagullError {
     OrderNotCancelable,
 
     #[msg("The price is not tick aligned!")]
-    PriceNotTickAligned
+    PriceNotTickAligned,
+
+    #[msg("The order exists and the provided auction end slot is not the same!")]
+    OrderExistsAuctionEndMismatch
 }

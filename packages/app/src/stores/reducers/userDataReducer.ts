@@ -11,6 +11,7 @@ import { findAssociatedTokenAddressSync } from "../../utils/solana";
 import { WRAPPED_SOL_MINT } from "../../models/types";
 import { notify } from "../../utils/notifications";
 import App from "next/app";
+import { addNotification } from "./notificationReducer";
 
 interface AccountData {
     account?: string

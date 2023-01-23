@@ -118,83 +118,93 @@ export class PendingTransaction<T> {
     }
 
     public async sendTransaction(connection: Connection): Promise<TransactionSignature> {
-        const RESEND_INTERVAL = 15;
-        const MAX_RESENDS = 5;
-
-        const sleep = (ms) => new Promise(
-            resolve => setTimeout(resolve, ms)
-        );
-
-        const withinRetryPeriod = () => {
-            return Date.now() < this.signInvalidTime - (RESEND_INTERVAL * 1000);
-        }
-
         this._sentTransaction = true;
-
-        return new Promise(async (resolve, reject) => {
-            let signature;
-            let confirmedSent = false;
-            let subscribedWebsocket = false;
-            let numResends = 0;
-
-            while (true){
-                try {
-                    if (!withinRetryPeriod()){
-                        reject("Transaction Listen Loop (fatal): Internal Timeout");
-                        return;
-                    }
-
-                    if (signature) {
-                        const response = await connection.getSignatureStatuses([signature]);
-                        const payload = response ? response.value[0] : null;
-
-                        if (payload && !payload.err) {
-                            if (payload.confirmationStatus == "finalized"){
-                                resolve(signature);
-                                return
-                            } else {
-                                confirmedSent = true;
-                            }
-                        }
-                    }
-
-                    if (!confirmedSent && numResends < MAX_RESENDS){
-                        try {
-                            numResends++;
-                            signature = await sendTransaction(connection, this.signedTransaction);
-                        } catch (err){
-                            if (err == "Error: failed to send transaction: Transaction simulation failed: This transaction has already been processed"){
-                                confirmedSent = true;
-                            }
-                        }
-                    }
-
-                    if (!subscribedWebsocket && signature){
-                        subscribedWebsocket = true;
-                        connection.onSignature(signature, (signatureResult) => {
-                            if (signatureResult.err){
-                                subscribedWebsocket = false;
-                            } else {
-                                resolve(signature);
-                                return;
-                            }
-                        }, "finalized");
-                    }
-
-                    await sleep(RESEND_INTERVAL * 1000);
-                } catch (err){
-                    if (!withinRetryPeriod()){
-                        reject("Transaction Listen Loop (fatal): " + err);
-                        return;
-                    }
-                    if (signature){
-                        connection.removeSignatureListener(signature).then(() => {
-                            console.log("Unsubscribed from listener: " + signature);
-                        });
-                    }
-                }
-            }
+        const signature = await sendTransaction(connection, this.signedTransaction);
+        console.log("signature: " + signature);
+        await connection.confirmTransaction({
+            signature: signature,
+            blockhash: this.signedTransaction.recentBlockhash,
+            lastValidBlockHeight: this.signedTransaction.lastValidBlockHeight
         });
+        return signature;
+
+        // const RESEND_INTERVAL = 15;
+        // const MAX_RESENDS = 5;
+        //
+        // const sleep = (ms) => new Promise(
+        //     resolve => setTimeout(resolve, ms)
+        // );
+        //
+        // const withinRetryPeriod = () => {
+        //     return Date.now() < this.signInvalidTime - (RESEND_INTERVAL * 1000);
+        // }
+        //
+        // this._sentTransaction = true;
+        //
+        // return new Promise(async (resolve, reject) => {
+        //     let signature;
+        //     let confirmedSent = false;
+        //     let subscribedWebsocket = false;
+        //     let numResends = 0;
+        //
+        //     while (true){
+        //         try {
+        //             if (!withinRetryPeriod()){
+        //                 reject("Transaction Listen Loop (fatal): Internal Timeout");
+        //                 return;
+        //             }
+        //
+        //             if (signature) {
+        //                 const response = await connection.getSignatureStatuses([signature]);
+        //                 const payload = response ? response.value[0] : null;
+        //
+        //                 if (payload && !payload.err) {
+        //                     if (payload.confirmationStatus == "confirmed"){
+        //                         resolve(signature);
+        //                         return
+        //                     } else {
+        //                         confirmedSent = true;
+        //                     }
+        //                 }
+        //             }
+        //
+        //             if (!confirmedSent && numResends < MAX_RESENDS){
+        //                 try {
+        //                     numResends++;
+        //                     signature = await sendTransaction(connection, this.signedTransaction);
+        //                 } catch (err){
+        //                     if (err == "Error: failed to send transaction: Transaction simulation failed: This transaction has already been processed"){
+        //                         confirmedSent = true;
+        //                     }
+        //                 }
+        //             }
+        //
+        //             if (!subscribedWebsocket && signature){
+        //                 subscribedWebsocket = true;
+        //                 connection.onSignature(signature, (signatureResult) => {
+        //                     if (signatureResult.err){
+        //                         subscribedWebsocket = false;
+        //                     } else {
+        //                         resolve(signature);
+        //                         return;
+        //                     }
+        //                 }, "finalized");
+        //             }
+        //
+        //             await sleep(RESEND_INTERVAL * 1000);
+        //         } catch (err){
+        //             if (!withinRetryPeriod()){
+        //                 reject("Transaction Listen Loop (fatal): " + err);
+        //                 return;
+        //             }
+        //             if (signature){
+        //                 connection.removeSignatureListener(signature).then(() => {
+        //                     console.log("Unsubscribed from listener: " + signature);
+        //                 });
+        //             }
+        //         }
+        //     }
+        // });
     }
 
     public applyPatchesAll(state: BalanceDataMap<T>): BalanceDataMap<T> {

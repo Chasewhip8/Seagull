@@ -2,9 +2,6 @@
  - Deterministically derive the user id inside of the program based on the authority! This would prevent a DOS where attackers would initialize accounts over the order_id location for another. Severity: LOW Difficulty: EASY
 
 # TODO
- - Finish Website
-   - Finish state, execute transaction
- - Create CLI for markets
  - Finish Readme
  - Finish Pitch Deck
  - Finish Twitter Thread

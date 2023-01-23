@@ -84,12 +84,17 @@ impl<'info> PlaceOrder<'info> {
                 return Err(error!(SeagullError::OrderExistsAndFilled));
             }
 
+            if existing_order.a_end != a_end {
+                return Err(error!(SeagullError::OrderExistsAuctionEndMismatch));
+            }
+
             existing_order.size += size;
 
             emit!(OrderEditEvent {
                 market: self.market.key(),
                 order_id: order_key,
-                size: existing_order.size
+                size: existing_order.size,
+                a_end: a_end
             });
 
             return Ok(());
@@ -97,9 +102,10 @@ impl<'info> PlaceOrder<'info> {
 
         if order_queue.len() == MAX_ORDERS {
             let mut order_key: Option<u128> = None;
-            for (key, order) in order_queue.iter_mut() {
+            for (key, order) in order_queue.iter() {
                 if order.a_end + BACKSTOP_LENGTH <= self.clock.slot {
                     order_key = Some(*key);
+                    break;
                 }
             }
 
