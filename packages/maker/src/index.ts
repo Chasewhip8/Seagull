@@ -40,7 +40,6 @@ async function setupMarkets(){
                 baseHolding.publicKey
             )
         } catch (e) {
-            console.log(e);
             console.log("Market likely already exists!")
         }
 
@@ -172,6 +171,8 @@ async function maker() {
         },
         "confirmed"
     );
+
+    console.log("Filler: " + config.filler.publicKey);
 }
 
 maker().then(() => console.log("Done."))
