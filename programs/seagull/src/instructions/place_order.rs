@@ -6,7 +6,7 @@ use anchor_spl::token::spl_token::instruction::transfer_checked;
 use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
 use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T, BACKSTOP_LENGTH, MAX_ORDERS};
 
-use crate::events::{OrderPlaceEvent, OrderEditEvent, OrderCancelEvent};
+use crate::events::{OrderPlaceEvent, OrderCancelEvent};
 use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, User};
 use crate::error::SeagullError;
 use crate::pda::market::Side;
@@ -74,31 +74,13 @@ impl<'info> PlaceOrder<'info> {
 
         self.user.add_to_side(size, side);
 
-        let buf = &mut self.order_queue.load_mut()?.queue;
+        let order_queue_account = &mut self.order_queue.load_mut()?;
+        let order_key = OrderInfo::get_key(side, self.user.user_id, order_queue_account.sequential_index);
+
+        order_queue_account.sequential_index = order_queue_account.sequential_index.checked_add(1).unwrap();
+
+        let buf = &mut order_queue_account.queue;
         let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
-        let order_key = OrderInfo::get_key(lowest_price, side, self.user.user_id);
-
-        if let Some(existing_order) = order_queue.get_mut(&order_key) {
-            // Since we have not implemented partial fills at this stage we will error on adjusting already filled orders.
-            if existing_order.has_filler() {
-                return Err(error!(SeagullError::OrderExistsAndFilled));
-            }
-
-            if existing_order.a_end != a_end {
-                return Err(error!(SeagullError::OrderExistsAuctionEndMismatch));
-            }
-
-            existing_order.size += size;
-
-            emit!(OrderEditEvent {
-                market: self.market.key(),
-                order_id: order_key,
-                size: existing_order.size,
-                a_end: a_end
-            });
-
-            return Ok(());
-        }
 
         if order_queue.len() == MAX_ORDERS {
             let mut order_key: Option<u128> = None;
@@ -122,7 +104,7 @@ impl<'info> PlaceOrder<'info> {
         }
 
         // An existing order matching the price does not exist! Lets insert one.
-        let order = OrderInfo::from(size, a_end);
+        let order = OrderInfo::from(size, lowest_price, a_end);
         let insert_node = order_queue.insert(order_key, order);
         if insert_node.is_none() {
             return Err(error!(SeagullError::OrderQueueFull));

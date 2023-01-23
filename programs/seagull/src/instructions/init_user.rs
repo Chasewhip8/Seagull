@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use crate::constants::{ID_RESERVED_SIDE_BIT, NULL_FILLER};
+use crate::constants::{ID_RESERVED_SIDE_BIT_U64, NULL_FILLER};
 
 use crate::pda::{Market, User};
 
@@ -31,7 +31,7 @@ impl<'info> InitUser<'info> {
         // Implied Validation: The order_id is unused as anchor would throw an error initializing and already
         //                     initialized account.
 
-        assert_eq!(user_id & ID_RESERVED_SIDE_BIT, 0, "Reserved upper byte needs to be 0'd."); // Reserve this byte for side encoding in orders.
+        assert_eq!(user_id & ID_RESERVED_SIDE_BIT_U64, 0, "Reserved upper byte needs to be 0'd."); // Reserve this byte for side encoding in orders.
         assert_ne!(user_id, NULL_FILLER); // cannot be null filler, all 0'd
 
         Ok(())

@@ -52,13 +52,14 @@ macro_rules! gen_market_signer_seeds {
 }
 
 #[account(zero_copy)]
-#[repr(transparent)]
+#[repr(packed)]
 pub struct OrderQueue {
-    pub queue: [u8; 10128]
+    pub sequential_index: u64,
+    pub queue: [u8; 5424]
 }
 
 impl OrderQueue {
-    pub const LEN: usize = mem::size_of::<OrderQueueCritbit>();
+    pub const LEN: usize = mem::size_of::<OrderQueueCritbit>() + 8;
 
     // Workaround for Anchor Bug preventing us from putting the LEN inside of the array causing idl type parse errors.
     const _LEN_CHECK: [u8; OrderQueue::LEN] = [0; mem::size_of::<OrderQueue>()];
@@ -69,6 +70,7 @@ pub type OrderQueueCritbit = Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>;
 #[derive(Copy, Clone, Default)]
 #[repr(packed)]
 pub struct OrderInfo {
+    pub price: u64,
     pub size: u64,
     pub a_end: Slot,
 
@@ -95,9 +97,9 @@ impl FillerInfo {
 }
 
 impl OrderInfo {
-    pub fn from(size: u64, a_end: Slot) -> OrderInfo {
+    pub fn from(size: u64, price: u64, a_end: Slot) -> OrderInfo {
         OrderInfo {
-            size, a_end, filler_info: FillerInfo::default()
+            size, price, a_end, filler_info: FillerInfo::default()
         }
     }
 
@@ -105,20 +107,16 @@ impl OrderInfo {
         self.filler_info.is_valid()
     }
 
-    pub fn get_key(price: u64, side: Side, user_id: u64) -> u128 {
-        ((price as u128) << 64) | ((user_id | side.get_side_bit()) as u128) // Upper bits: price, Lower bits: user_id, 64th bit is side.
-    }
-
-    pub fn get_price_from_key(key: u128) -> u64 {
-        (key >> 64) as u64
+    pub fn get_key(side: Side, user_id: u64, sequential_bump: u64) -> u128 {
+        ((user_id as u128) << 64) | (sequential_bump as u128) | side.get_side_bit() // Upper bits: upper bits: user_id, 128th bit is side. lower is sequential number
     }
 
     pub fn get_user_id_from_key(key: u128) -> u64 {
-        key as u64
+        (key >> 64) as u64
     }
 
     pub fn get_side_from_key(key: u128) -> Side {
-        let bit = ((key as u64) & ID_RESERVED_SIDE_BIT) != 0;
+        let bit = (key & ID_RESERVED_SIDE_BIT) != 0;
         Side::from_side_bit(bit)
     }
 }
@@ -131,7 +129,7 @@ pub enum Side {
 }
 
 impl Side {
-    fn get_side_bit(self) -> u64 {
+    fn get_side_bit(self) -> u128 {
         match self {
             Buy => ID_RESERVED_SIDE_BIT,
             Sell => 0

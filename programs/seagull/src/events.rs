@@ -24,14 +24,6 @@ pub struct OrderPlaceEvent {
 }
 
 #[event]
-pub struct OrderEditEvent {
-    pub market: Pubkey,
-    pub order_id: u128,
-    pub size: u64,
-    pub a_end: u64
-}
-
-#[event]
 pub struct OrderCancelEvent {
     pub market: Pubkey,
     pub order_id: u128,

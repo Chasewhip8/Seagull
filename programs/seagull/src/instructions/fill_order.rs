@@ -87,22 +87,15 @@ impl<'info> FillOrder<'info> {
         let mut is_first_order = true;
         let mut last_matched_order_id = 0;
 
-        let a = filler_info.max_size;
-        let b = filler_info.price;
-        msg!("our_size: {} our_prize: {}", a, b);
-
         loop {
             let mut matched = false;
 
             for (key, order_info) in order_queue.iter_mut() {
                 let key = *key;
 
-                let si = order_info.size;
-                msg!("key: {} size: {} prize: {}", key, si, OrderInfo::get_price_from_key(key));
-
                 if OrderInfo::get_side_from_key(key) == filler_side // We cannot fill our own side.
                     || order_info.a_end > filler_info.expire_slot
-                    || OrderInfo::get_price_from_key(key) > filler_info.price // We cannot provide a good enough price to fill this order
+                    || order_info.price > filler_info.price // We cannot provide a good enough price to fill this order
                     || (order_info.has_filler() && order_info.filler_info.price >= filler_info.price) { // We cant beat the current price.
                     continue;
                 }

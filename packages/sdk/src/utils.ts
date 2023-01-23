@@ -15,12 +15,8 @@ export function getSideBit(side: Side): BN {
     return "buy" in side ? ID_RESERVED_SIDE_BIT : BN_0; // TODO test this! MarketSide.Buy
 }
 
-export function getPriceFromKey(key: BN): BN {
-    return key.ushrn(64);
-}
-
 export function getUserIdFromKey(key: BN): BN {
-    return key.uand(U64_MAX_BN);
+    return key.ushrn(64).iuand(U64_MAX_BN);
 }
 
 export function getSideFromKey(key: BN): Side {

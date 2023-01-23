@@ -523,11 +523,15 @@ export type Seagull = {
         "kind": "struct",
         "fields": [
           {
+            "name": "sequentialIndex",
+            "type": "u64"
+          },
+          {
             "name": "queue",
             "type": {
               "array": [
                 "u8",
-                10128
+                10632
               ]
             }
           }
@@ -623,31 +627,6 @@ export type Seagull = {
     },
     {
       "name": "OrderPlaceEvent",
-      "fields": [
-        {
-          "name": "market",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "orderId",
-          "type": "u128",
-          "index": false
-        },
-        {
-          "name": "size",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "aEnd",
-          "type": "u64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "OrderEditEvent",
       "fields": [
         {
           "name": "market",
@@ -1281,11 +1260,15 @@ export const IDL: Seagull = {
         "kind": "struct",
         "fields": [
           {
+            "name": "sequentialIndex",
+            "type": "u64"
+          },
+          {
             "name": "queue",
             "type": {
               "array": [
                 "u8",
-                10128
+                10632
               ]
             }
           }
@@ -1381,31 +1364,6 @@ export const IDL: Seagull = {
     },
     {
       "name": "OrderPlaceEvent",
-      "fields": [
-        {
-          "name": "market",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "orderId",
-          "type": "u128",
-          "index": false
-        },
-        {
-          "name": "size",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "aEnd",
-          "type": "u64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "OrderEditEvent",
       "fields": [
         {
           "name": "market",

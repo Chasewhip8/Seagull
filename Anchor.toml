@@ -3,13 +3,13 @@ seeds = true
 skip-lint = false
 
 [programs.localnet]
-seagull = "5m6icMgJpaZoWywACLyRtTrdZ52FUoR6x6iuciKky9J2"
+seagull = "9zXtk38f7dTXtTczP6X675NNHFZkci6RHgontwxoKznd"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "/home/chase/.config/solana/id.json"
 
 [scripts]

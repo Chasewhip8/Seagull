@@ -11,7 +11,7 @@ mod constants;
 mod math;
 mod events;
 
-declare_id!("5m6icMgJpaZoWywACLyRtTrdZ52FUoR6x6iuciKky9J2");
+declare_id!("9zXtk38f7dTXtTczP6X675NNHFZkci6RHgontwxoKznd");
 
 #[program]
 pub mod seagull {
