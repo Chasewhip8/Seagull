@@ -38,6 +38,7 @@ export function usePlaceOrderTransaction(): () => Promise<Transaction> {
         return new PendingTransaction(
             `Place order`,
             (state) => {
+                // @ts-ignore
                 const currentBase = state[mint];
 
                 currentBase.balance = currentBase.balance - amount;
