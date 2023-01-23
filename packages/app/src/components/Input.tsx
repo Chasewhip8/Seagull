@@ -1,4 +1,5 @@
-import React from "react";
+import React, { ChangeEventHandler } from "react";
+import { classNames } from "../utils/styles";
 
 type Props = {
   className: string;
@@ -6,6 +7,9 @@ type Props = {
   name: string;
   id: string;
   type: React.HTMLInputTypeAttribute;
+  inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search' | undefined;
+  onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
+  min?: number;
   value: string | number;
   description?: string;
   placeholder?: string;
@@ -14,6 +18,8 @@ type Props = {
 };
 
 const Input = (props: Props) => {
+  const isNumeric = props.inputMode == "numeric" || props.inputMode == "decimal";
+
   return (
     <div className={props.className}>
       {props.label ? (
@@ -29,8 +35,15 @@ const Input = (props: Props) => {
           type={props.type}
           name={props.name}
           id={props.id}
-          value={props.value}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5"
+          value={isNumeric ? props.value : undefined}
+          onChange={props.onChange}
+          min={isNumeric ? props.min : undefined}
+          disabled={props.disabled}
+          inputMode={props.inputMode}
+          className={classNames(
+              "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5",
+              props.disabled ? "bg-gray-100" : ""
+          )}
           placeholder={props.placeholder ? props.placeholder : null}
           aria-describedby={props.ariaDescribedBy}
         />

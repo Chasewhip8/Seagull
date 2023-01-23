@@ -11,23 +11,23 @@ require("@solana/wallet-adapter-react-ui/styles.css");
 require("../styles/globals.scss");
 
 const App: FC<AppProps> = ({ Component, pageProps }) => {
-  return (
-    <>
-      <Head>
-        <title>Seagull Finance</title>
-        <meta name="description" content="Seagull Finance" />
-      </Head>
+    return (
+        <>
+            <Head>
+                <title>Seagull Finance</title>
+                <meta name="description" content="Seagull Finance" />
+            </Head>
 
-      <Provider store={store}>
-        <PersistGate persistor={persistor}>
-          <AppProviders>
-            <Notifications />
-            <Component {...pageProps} />
-          </AppProviders>
-        </PersistGate>
-      </Provider>
-    </>
-  );
+            <Provider store={store}>
+                <PersistGate persistor={persistor}>
+                    <AppProviders>
+                        <Notifications />
+                        <Component {...pageProps} />
+                    </AppProviders>
+                </PersistGate>
+            </Provider>
+        </>
+    );
 };
 
 export default App;

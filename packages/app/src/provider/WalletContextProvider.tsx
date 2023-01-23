@@ -1,6 +1,10 @@
 import { WalletError } from '@solana/wallet-adapter-base';
 import { WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider as ReactUIWalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import {
+    WalletDisconnectButton, WalletModalProvider,
+    WalletModalProvider as ReactUIWalletModalProvider,
+    WalletMultiButton
+} from '@solana/wallet-adapter-react-ui';
 import { FC, ReactNode, useCallback, useMemo } from 'react';
 import { selectClusterConfig } from "../stores/reducers/configReducer";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
@@ -30,7 +34,9 @@ export const WalletContextProvider: FC<{ children: ReactNode }> = ({ children })
 
     return (
         <WalletProvider wallets={wallets} onError={onError} autoConnect={autoConnect}>
-            <ReactUIWalletModalProvider>{children}</ReactUIWalletModalProvider>
+            <WalletModalProvider>
+                {children}
+            </WalletModalProvider>
         </WalletProvider>
     );
 };

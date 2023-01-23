@@ -9,6 +9,7 @@ export type ClusterConfig = {
     commitment: Commitment,
     transactionTimeout: number,
     tokens: TokenInfo[],
+    markets: MarketInfo[]
 }
 
 export type TokenInfo = {
@@ -19,6 +20,13 @@ export type TokenInfo = {
     price?: number,
     extraInfo?: string,
     decimals?: number
+}
+
+export type MarketInfo = {
+    name: string,
+    address: string,
+    image: any,
+    description: string
 }
 
 export interface KeyValueMap<T> {
