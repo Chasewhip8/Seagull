@@ -19,7 +19,7 @@ export function getPriceFromKey(key: BN): BN {
     return key.ushrn(64);
 }
 
-function getUserIdFromKey(key: BN): BN {
+export function getUserIdFromKey(key: BN): BN {
     return key.uand(U64_MAX_BN);
 }
 

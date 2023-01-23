@@ -42,9 +42,10 @@ const DEVNET: ClusterConfig = {
       address: "testAddress3"
     }
   ],
+  programId: "DmcruH9NFwSAxZL4u1UdQd3S5TQdS8SQGFjFbng5KBEC",
   walletAdapterNetwork: WalletAdapterNetwork.Devnet,
   refreshBalanceInterval: 60,
-  clusterUrl: "https://devnet.genesysgo.net/",
+  clusterUrl: "https://localhost:8899/",
   commitment: "confirmed",
   transactionTimeout: 120 * 1000,
 };

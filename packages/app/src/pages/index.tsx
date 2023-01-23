@@ -2,18 +2,24 @@ import Container from "components/layout/Container";
 import Navigation from "components/layout/Navigation";
 import Card from "components/layout/Card";
 import type { NextPage } from "next";
-import { useAppSelector } from "hooks/common";
+import { useAppDispatch, useAppSelector, useTokenInfo } from "hooks/common";
 import Selector from "components/Selector";
 import Input from "components/Input";
 import { AmountInput } from "../components/AmountInput";
 import { classNames } from "../utils/styles";
 import { MarketSide } from "@seagullfinance/seagull/dist/types";
 import { selectClusterConfig } from "../stores/reducers/configReducer";
+import { selectMarket, selectSide, setMarket, setSide } from "../stores/reducers/interfaceReducer";
 
 const Dashboard: NextPage = (props) => {
+    const dispatch = useAppDispatch();
     const config = useAppSelector(selectClusterConfig);
 
-    const side = MarketSide.Buy;
+    const side = useAppSelector(selectSide);
+    const market = useAppSelector(selectMarket);
+
+    const baseInfo = useTokenInfo(market?.baseMint.toBase58());
+    const quoteInfo = useTokenInfo(market?.quoteMint.toBase58());
 
     return (
         <main className="bg-gray-50 h-screen">
@@ -27,15 +33,17 @@ const Dashboard: NextPage = (props) => {
                         <div className={"flex flex-row w-full"}>
                             <button
                                 className={classNames(
-                                    "w-full inline-flex items-center rounded-l-md border border-green-600 px-4 py-2 text-sm font-medium text-green-600 shadow-sm hover:bg-green-300 focus:outline-none",
+                                    "w-full inline-flex justify-center items-center rounded-l-md border border-green-600 px-4 py-2 text-sm font-medium text-green-600 shadow-sm hover:bg-green-300 focus:outline-none",
                                     side == MarketSide.Buy ? "bg-green-200" : "bg-transparent"
                                 )}
+                                onClick={() => dispatch(setSide(MarketSide.Buy))}
                             >BUY</button>
                             <button
                                 className={classNames(
-                                    "w-full inline-flex items-center rounded-r border border-red-600 bg-transparent px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-300 focus:outline-none",
+                                    "w-full inline-flex justify-center items-center rounded-r border border-red-600 bg-transparent px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-300 focus:outline-none",
                                     side == MarketSide.Sell ? "bg-red-200" : "bg-transparent"
                                 )}
+                                onClick={() => dispatch(setSide(MarketSide.Sell))}
                             >SELL</button>
                         </div>
                         <div className="flex flex-row space-x-2 w-full">
@@ -49,12 +57,13 @@ const Dashboard: NextPage = (props) => {
                                     details: market.description,
                                     data: market
                                 }))}
+                                onChange={(item) => dispatch(setMarket(item.address))}
                             />
                             <AmountInput
                                 className="flex-1"
                                 amount={1}
                                 onChange={(newValue) => {}}
-                                label="Amount"
+                                label={`${baseInfo.symbol} Amount`}
                                 name="amount"
                                 id="amount"
                             />
@@ -72,7 +81,7 @@ const Dashboard: NextPage = (props) => {
                                 className="flex-1"
                                 amount={1}
                                 onChange={(newValue) => {}}
-                                label="Price"
+                                label={`${quoteInfo.symbol} Price`}
                                 name="price"
                                 id="price"
                             />
@@ -80,7 +89,7 @@ const Dashboard: NextPage = (props) => {
                         <div className="flex flex-row mt-3">
                             <button
                                 className="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                            >Execute Order</button>
+                            >{side == MarketSide.Buy ? "Start Buy Auction" : "Start Sell Auction"}</button>
                         </div>
                     </div>
                 </Card>

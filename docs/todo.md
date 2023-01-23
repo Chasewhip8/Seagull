@@ -3,7 +3,16 @@
 
 # TODO
  - Finish Website
+   - Finish state, execute transaction
+ - Create CLI for markets
  - Finish Readme
  - Finish Pitch Deck
  - Finish Twitter Thread
  - Submit
+
+# Tracks
+ - Bonking with Bonk!
+ - Liquid Staking
+ - Student Prize
+ - LamportDAO Global Prize
+ - DeFi Grand Prize

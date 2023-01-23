@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
-import { BN, BorshCoder, BorshEventCoder, EventParser, Program } from "@project-serum/anchor";
-import { Seagull } from "../target/types/seagull";
+import { BN, BorshCoder, EventParser, Program } from "@project-serum/anchor";
+import { Seagull } from "../../../target/types/seagull";
 import {
     ConfirmOptions,
     Connection,

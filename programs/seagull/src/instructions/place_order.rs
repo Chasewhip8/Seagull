@@ -87,6 +87,7 @@ impl<'info> PlaceOrder<'info> {
             existing_order.size += size;
 
             emit!(OrderEditEvent {
+                market: self.market.key(),
                 order_id: order_key,
                 size: existing_order.size
             });
@@ -106,6 +107,7 @@ impl<'info> PlaceOrder<'info> {
                 order_queue.remove(&order_key);
 
                 emit!(OrderCancelEvent {
+                    market: self.market.key(),
                     order_id: order_key
                 })
             } else {
@@ -121,8 +123,10 @@ impl<'info> PlaceOrder<'info> {
         }
 
         emit!(OrderPlaceEvent {
+            market: self.market.key(),
             order_id: order_key,
-            size: size
+            size: size,
+            a_end: a_end
         });
 
         Ok(())

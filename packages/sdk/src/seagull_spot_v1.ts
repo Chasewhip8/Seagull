@@ -580,6 +580,11 @@ export type Seagull = {
       "name": "OrderMatchedEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "orderId",
           "type": "u128",
           "index": false
@@ -600,6 +605,11 @@ export type Seagull = {
       "name": "OrderRematchFailEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "originalOrderId",
           "type": "u128",
           "index": false
@@ -614,6 +624,11 @@ export type Seagull = {
     {
       "name": "OrderPlaceEvent",
       "fields": [
+        {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
         {
           "name": "orderId",
           "type": "u128",
@@ -630,6 +645,11 @@ export type Seagull = {
       "name": "OrderEditEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "orderId",
           "type": "u128",
           "index": false
@@ -645,6 +665,11 @@ export type Seagull = {
       "name": "OrderCancelEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "orderId",
           "type": "u128",
           "index": false
@@ -654,6 +679,11 @@ export type Seagull = {
     {
       "name": "OrderSettledEvent",
       "fields": [
+        {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
         {
           "name": "orderId",
           "type": "u128",
@@ -680,26 +710,31 @@ export type Seagull = {
     },
     {
       "code": 6001,
+      "name": "OrderQueueEmpty",
+      "msg": "Order Queue is empty!"
+    },
+    {
+      "code": 6002,
       "name": "OrderExistsAndFilled",
       "msg": "The order at this price exists and is being filled already!"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "OrderNotMatched",
       "msg": "Their were no available orders to match the fill to!"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "OrderNotFound",
       "msg": "Order was not found!"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "OrderNotCancelable",
       "msg": "Order is not cancelable!"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "PriceNotTickAligned",
       "msg": "The price is not tick aligned!"
     }
@@ -1288,6 +1323,11 @@ export const IDL: Seagull = {
       "name": "OrderMatchedEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "orderId",
           "type": "u128",
           "index": false
@@ -1308,6 +1348,11 @@ export const IDL: Seagull = {
       "name": "OrderRematchFailEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "originalOrderId",
           "type": "u128",
           "index": false
@@ -1322,6 +1367,11 @@ export const IDL: Seagull = {
     {
       "name": "OrderPlaceEvent",
       "fields": [
+        {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
         {
           "name": "orderId",
           "type": "u128",
@@ -1338,6 +1388,11 @@ export const IDL: Seagull = {
       "name": "OrderEditEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "orderId",
           "type": "u128",
           "index": false
@@ -1353,6 +1408,11 @@ export const IDL: Seagull = {
       "name": "OrderCancelEvent",
       "fields": [
         {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "orderId",
           "type": "u128",
           "index": false
@@ -1362,6 +1422,11 @@ export const IDL: Seagull = {
     {
       "name": "OrderSettledEvent",
       "fields": [
+        {
+          "name": "market",
+          "type": "publicKey",
+          "index": false
+        },
         {
           "name": "orderId",
           "type": "u128",
@@ -1388,26 +1453,31 @@ export const IDL: Seagull = {
     },
     {
       "code": 6001,
+      "name": "OrderQueueEmpty",
+      "msg": "Order Queue is empty!"
+    },
+    {
+      "code": 6002,
       "name": "OrderExistsAndFilled",
       "msg": "The order at this price exists and is being filled already!"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "OrderNotMatched",
       "msg": "Their were no available orders to match the fill to!"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "OrderNotFound",
       "msg": "Order was not found!"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "OrderNotCancelable",
       "msg": "Order is not cancelable!"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "PriceNotTickAligned",
       "msg": "The price is not tick aligned!"
     }

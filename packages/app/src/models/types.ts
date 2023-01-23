@@ -8,6 +8,7 @@ export type ClusterConfig = {
     walletAdapterNetwork: WalletAdapterNetwork,
     commitment: Commitment,
     transactionTimeout: number,
+    programId: string,
     tokens: TokenInfo[],
     markets: MarketInfo[]
 }

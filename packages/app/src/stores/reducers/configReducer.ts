@@ -3,22 +3,28 @@ import { DEFAULT_CLUSTER } from "../../configs/ClusterConfig";
 import { ClusterConfig } from "../../models/types";
 import { RootState } from "../store";
 import { WalletContextState } from "@solana/wallet-adapter-react";
-import { Connection } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { SeagullMarketProvider } from "@seagullfinance/seagull/dist/api";
+import { SeagullSocks } from "@seagullfinance/seagull/dist/provider";
 
 // declaring the types for our state
 export type ConfigState = {
     cluster: ClusterConfig,
     connection: Connection,
+    sdk: SeagullMarketProvider<any>,
     wallet: WalletContextState
 };
 
 function initializeState(cluster: ClusterConfig, wallet: WalletContextState): ConfigState {
+    const connection = new Connection(cluster.clusterUrl, {
+        commitment: cluster.commitment,
+        confirmTransactionInitialTimeout: cluster.transactionTimeout
+    });
+
     return {
         cluster: cluster,
-        connection: new Connection(cluster.clusterUrl, {
-            commitment: cluster.commitment,
-            confirmTransactionInitialTimeout: cluster.transactionTimeout
-        }),
+        connection: connection,
+        sdk: new SeagullSocks(connection, new PublicKey(cluster.programId)),
         wallet: wallet
     }
 }
@@ -50,6 +56,7 @@ export const {
 export const selectClusterConfig = (state: RootState) => state.config.cluster;
 export const selectConnection = (state: RootState) => state.config.connection;
 export const selectWallet = (state: RootState) => state.config.wallet;
+export const selectSDK = (state: RootState) => state.config.sdk;
 
 // Exporting the reducer here, as we need to add this to the store
 export default configSlice.reducer;

@@ -67,7 +67,7 @@ impl<'info> FillOrder<'info> {
 
         // Match the order and redistribute others or error.
         // We do NOT error if we fail to redistribute other orders, just fail if we cannot match our own.
-        FillOrder::match_order(
+        self.match_order(
             order_queue,
             filler_side,
             FillerInfo {
@@ -83,7 +83,7 @@ impl<'info> FillOrder<'info> {
         Ok(())
     }
 
-    fn match_order(order_queue: &mut OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> Result<()> {
+    fn match_order(&self, order_queue: &mut OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> Result<()> {
         let mut is_first_order = true;
         let mut last_matched_order_id = 0;
         loop {
@@ -104,6 +104,7 @@ impl<'info> FillOrder<'info> {
 
                 // Emit an even to log when we fill
                 emit!(OrderMatchedEvent {
+                    market: self.market.key(),
                     order_id: key,
                     new_filler_id: order_info.filler_info.id,
                     replaced_filer_id: filler_info.id
@@ -117,6 +118,7 @@ impl<'info> FillOrder<'info> {
                 }
 
                 emit!(OrderRematchFailEvent {
+                    market: self.market.key(),
                     original_order_id: last_matched_order_id,
                     filler_id: filler_info.id
                 });

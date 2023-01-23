@@ -37,31 +37,38 @@ export type MarketEvent<T> = {
 }
 
 export type OrderMatchedEvent = {
+    market: PublicKey,
     orderId: BN,
     newFillerId: BN,
     replacedFilerId: BN
 }
 
 export type OrderRematchFailEvent = {
+    market: PublicKey,
     originalOrderId: BN,
     fillerId: BN
 }
 
 export type OrderPlaceEvent = {
+    market: PublicKey,
     orderId: BN,
-    size: BN
+    size: BN,
+    aEnd: BN
 }
 
 export type OrderEditEvent = {
+    market: PublicKey,
     orderId: BN,
     size: BN
 }
 
 export type OrderCancelEvent = {
+    market: PublicKey,
     orderId: BN,
 }
 
 export type OrderSettledEvent = {
+    market: PublicKey,
     orderId: BN,
     settledPrice: BN,
     settledSize: BN

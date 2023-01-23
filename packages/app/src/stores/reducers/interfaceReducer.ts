@@ -1,6 +1,8 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Market, MarketSide, Side, User } from "@seagullfinance/seagull/dist/types";
 import { RootState } from "../store";
+import { Accounts, addTransaction } from "./userDataReducer";
+import { PublicKey } from "@solana/web3.js";
 
 // declaring the types for our state
 export type interfaceState = {
@@ -19,6 +21,14 @@ function initializeState(): interfaceState {
     }
 }
 
+export const setMarket = createAsyncThunk<Market,
+    string,
+    { state: RootState }>('interface/setMarket',
+    async (address, { getState }): Promise<Market> => {
+        return getState().config.sdk.fetchMarket(new PublicKey(address));
+    }
+);
+
 // Create the actual state
 export const interfaceSlice = createSlice({
     name: 'interface',
@@ -26,13 +36,23 @@ export const interfaceSlice = createSlice({
     reducers: {
         resetInterfaceState: () => {
             return initializeState();
+        },
+        setSide: (state, action: PayloadAction<Side>) => {
+            state.side = action.payload;
         }
     },
+    extraReducers: builder => {
+        builder
+            .addCase(setMarket.fulfilled, (state, { payload }) => {
+                state.market = payload;
+            })
+    }
 });
 
 // Export of actions above in created slice
 export const {
     resetInterfaceState,
+    setSide
 } = interfaceSlice.actions;
 
 // Exports of selectors of the created slice

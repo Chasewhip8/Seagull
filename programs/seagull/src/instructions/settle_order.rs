@@ -118,6 +118,7 @@ impl<'info> SettleOrder<'info> {
         self.order_user.remove_from_side(size, order_side);
 
         emit!(OrderSettledEvent {
+            market: self.market.key(),
             order_id: order_id,
             settled_price: order.filler_info.price,
             settled_size: order.size
