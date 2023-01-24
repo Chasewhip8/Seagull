@@ -1,7 +1,7 @@
 # Seagull Socks JIT Markets
 Seagull JIT markets provide a composable layer for users- and protocols- to leverage auctions on SPL tokens. This README will summarize a high-level overview of how the markets function, why users should use them, and why you may consider leveraging them for your protocols.
 
-# The Concept
+## The Concept
 Users can place orders with the following set number of parameters:
 - lowest_price - Lowest price acceptable.
 - a_end - Auction end slot.
