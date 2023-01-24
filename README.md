@@ -17,10 +17,10 @@ Fillers can still provide a better price until the order has been settled. This 
 ### Tighter On-Chain Spreads
 JIT Markets allow time for Market Makers to hedge their position which can leverage price discrepancies between markets for tighter spreads on-chain. Theoretically, a Market Maker can fill the order at a higher price than on-chain but hedge with a lower price on a centralized exchange, and wait until the auction is finished to settle. This allows for both the user to get a better price and for markets to be more efficient.
 
-## Better-Priced Liquid Unstake
+### Better-Priced Liquid Unstake
 Since Solana's unstake mechanism is deterministic and revolves around the epoch schedule, users can set their auction to end at their preferred time before the epoch ends. Market Makers can then step in to fill the order, hedge the position elsewhere at the current redeem rate, and settle when the auction finishes. This allows for tighter spreads on liquid unstaking rather than relying on the liquidity on-chain or AMM pool to backstop the liquid unstake features. These traditional instant unstake mechanisms also require a fee whereas the JIT market does not.
 
-## Bonk
+### Bonk
 Bonk is strapped with Perpetual Futures markets on centralized and decentralized exchanges. Using the same logic, as above in Tighter On-Chain Spreads, Seagull can provide better spreads for orders and potentially burn accrued fees.
 
 ## The Stack (so far)
