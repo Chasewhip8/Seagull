@@ -3,12 +3,13 @@ use anchor_lang::solana_program::entrypoint::ProgramResult;
 use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
-use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
 
-use crate::pda::{User, Market, OrderQueue, OrderQueueCritbit, OrderInfo, FillerInfo};
-use crate::pda::market::Side;
-use crate::events::{OrderMatchedEvent, OrderRematchFailEvent};
+use sokoban::{NodeAllocatorMap, ZeroCopy};
+
 use crate::error::SeagullError;
+use crate::events::{OrderMatchedEvent, OrderRematchFailEvent};
+use crate::pda::{FillerInfo, Market, OrderInfo, OrderQueue, OrderQueueType, User};
+use crate::pda::market::Side;
 
 #[derive(Accounts)]
 #[instruction(filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64)]
@@ -59,7 +60,7 @@ impl<'info> FillOrder<'info> {
 
     pub fn handle(&mut self, filler_side: Side, filler_size: u64, filler_price: u64, filler_expire_slot: u64) -> Result<()> {
         let buf = &mut self.order_queue.load_mut()?.queue;
-        let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
+        let order_queue: &mut OrderQueueType = OrderQueueType::load_mut_bytes(buf).unwrap();
 
         if order_queue.len() == 0 {
             return Err(error!(SeagullError::OrderQueueEmpty));
@@ -83,7 +84,7 @@ impl<'info> FillOrder<'info> {
         Ok(())
     }
 
-    fn match_order(&self, order_queue: &mut OrderQueueCritbit, filler_side: Side, mut filler_info: FillerInfo) -> Result<()> {
+    fn match_order(&self, order_queue: &mut OrderQueueType, filler_side: Side, mut filler_info: FillerInfo) -> Result<()> {
         let mut is_first_order = true;
         let mut last_matched_order_id = 0;
 

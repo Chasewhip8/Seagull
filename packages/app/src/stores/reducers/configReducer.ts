@@ -21,6 +21,8 @@ function initializeState(cluster: ClusterConfig, wallet: WalletContextState): Co
         confirmTransactionInitialTimeout: cluster.transactionTimeout
     });
 
+    console.log(cluster.programId);
+
     return {
         cluster: cluster,
         connection: connection,

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
-use crate::constants::{ID_RESERVED_SIDE_BIT_U64, NULL_FILLER};
 
+use crate::constants::{ID_RESERVED_SIDE_BIT_U64, NULL_FILLER};
 use crate::pda::{Market, User};
 
 #[derive(Accounts)]

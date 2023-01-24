@@ -1,9 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use sokoban::{Critbit, FromSlice};
-use crate::math::fp32_calc_min_tick_sizes;
 
-use crate::pda::{Market, OrderQueue, OrderQueueCritbit};
+use sokoban::FromSlice;
+
+use crate::math::fp32_calc_min_tick_sizes;
+use crate::pda::{Market, OrderQueue, OrderQueueType};
 
 #[derive(Accounts)]
 pub struct InitMarket<'info> {
@@ -69,8 +70,11 @@ impl<'info> InitMarket<'info> {
     }
 
     pub fn handle(&mut self, bump: u8) -> Result<()> {
-        let buf = &mut self.order_queue.load_init()?.queue;
-        let _order_queue: &mut OrderQueueCritbit = Critbit::new_from_slice(buf);
+        let order_queue_account = &mut self.order_queue.load_init()?;
+        order_queue_account.sequential_index = 0;
+
+        let buf = &mut order_queue_account.queue;
+        let _order_queue: &mut OrderQueueType = OrderQueueType::new_from_slice(buf);
 
         let market = &mut self.market;
         market.quote_mint = self.quote_mint.key();

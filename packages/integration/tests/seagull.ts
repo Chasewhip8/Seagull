@@ -16,7 +16,7 @@ import {
     findMarketAddress,
     findUserAddress,
     fp32CalcMinTickSizes,
-    fp32FromNumber, getKey,
+    fp32FromNumber,
     tickAlignFloor
 } from "../../sdk/src/utils";
 import { Market, MarketEvent, MarketSide, OrderPlaceEvent, OrderSettledEvent, User } from "../../sdk/src/types";

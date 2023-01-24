@@ -1,14 +1,15 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_lang::solana_program::program::{invoke_signed};
+use anchor_lang::solana_program::program::invoke_signed;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
-use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
-use crate::constants::BACKSTOP_LENGTH;
 
-use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, Side, User};
+use sokoban::{NodeAllocatorMap, ZeroCopy};
+
+use crate::constants::BACKSTOP_LENGTH;
 use crate::error::SeagullError;
 use crate::gen_market_signer_seeds;
+use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueType, Side, User};
 use crate::pda::Side::{Buy, Sell};
 
 #[derive(Accounts)]
@@ -69,7 +70,7 @@ impl<'info> CancelOrder<'info> {
 
     pub fn handle(&mut self, order_id: u128) -> Result<()> {
         let buf = &mut self.order_queue.load_mut()?.queue;
-        let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
+        let order_queue: &mut OrderQueueType = OrderQueueType::load_mut_bytes(buf).unwrap();
         let order_side = OrderInfo::get_side_from_key(order_id);
 
         let order = self.validate_order(order_side, order_queue.get(&order_id))?;

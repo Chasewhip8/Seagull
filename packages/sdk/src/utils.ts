@@ -1,14 +1,21 @@
 import { BN } from "@project-serum/anchor";
 import { MarketSide, Side, User } from "./types";
-import { BN_0, ID_RESERVED_SIDE_BIT, ID_SAFE_BITS, SEAGULL_PROGRAM_ID, U64_MAX_BN } from "./constants";
+import {
+    BN_0,
+    ID_RESERVED_SIDE_BIT,
+    ID_RESERVED_SIDE_BIT_U64,
+    ID_SAFE_BITS,
+    SEAGULL_PROGRAM_ID,
+    U64_MAX_BN
+} from "./constants";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@project-serum/anchor/dist/cjs/utils/token";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
 import { SeagullMarketProvider } from "./api";
 
-export function getKey(price: BN, side: Side, user_id: BN): BN {
-    return price.ushln(64).ior(user_id).ior(getSideBit(side)); // Upper bits: price, Lower bits: user_id, 64th bit is side.
+export function getKey(side: Side, user_id: BN, sequential_bump: BN): BN {
+    return user_id.ushln(64).ior(getSideBit(side)).ior(sequential_bump); // Upper bits: price, Lower bits: user_id, 64th bit is side.
 }
 
 export function getSideBit(side: Side): BN {
@@ -16,11 +23,11 @@ export function getSideBit(side: Side): BN {
 }
 
 export function getUserIdFromKey(key: BN): BN {
-    return key.ushrn(64).iuand(U64_MAX_BN);
+    return key.shrn(64).iuand(ID_RESERVED_SIDE_BIT_U64.notn(64));
 }
 
 export function getSideFromKey(key: BN): Side {
-    return getUserIdFromKey(key).iuand(ID_RESERVED_SIDE_BIT).eqn(0)
+    return key.uand(ID_RESERVED_SIDE_BIT).eqn(0)
         ? MarketSide.Sell : MarketSide.Buy;
 }
 

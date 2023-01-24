@@ -15,27 +15,27 @@ Fillers can still provide a better price until the order has been settled. This 
 
 ## Use Cases
 ### Tighter On-Chain Spreads
-JIT Markets allow time for Market Makers to hedge their position which can leverage price discrepancies between markets for tighter spreads on-chain. A Market Maker can fill the order at a higher price than on-chain but lower than on a centralized exchange for instance, and hedge their position until the auction is finished. Allowing for both the user to get a better price, and for markets to be more efficient.
+JIT Markets allow time for Market Makers to hedge their position which can leverage price discrepancies between markets for tighter spreads on-chain. Theoretically, a Market Maker can fill the order at a higher price than on-chain but hedge with a lower price on a centralized exchange, and wait until the auction is finished to settle. This allows for both the user to get a better price and for markets to be more efficient.
 
 ## Better-Priced Liquid Unstake
-Since Solana's unstake mechanism is deterministic and revolves around the epoch schedule, a user can set the auction end to a time they feel comfortable with before the epoch ends. Makers can then step in and fill the order while hedging the position elsewhere as the current redeem rate and settle when the auction finishes. This allows for tighter spreads on liquid unstaking rather than needing to rely on the on-chain liquidity or amm pool to backstop the liquid unstake features, which also require a fee.
+Since Solana's unstake mechanism is deterministic and revolves around the epoch schedule, users can set their auction to end at their preferred time before the epoch ends. Market Makers can then step in to fill the order, hedge the position elsewhere at the current redeem rate, and settle when the auction finishes. This allows for tighter spreads on liquid unstaking rather than relying on the liquidity on-chain or AMM pool to backstop the liquid unstake features. These traditional instant unstake mechanisms also require a fee whereas the JIT market does not.
 
 ## Bonk
-Bonk has emerged and is strapped with perpetual futures markets on centralized and decentralized exchanges. Using the same logic in the first use case we can provide better spreads for orders. Potentially burning fees accrued as well!
+Bonk is strapped with Perpetual Futures markets on centralized and decentralized exchanges. Using the same logic, as above in Tighter On-Chain Spreads, Seagull can provide better spreads for orders and potentially burn accrued fees.
 
 ## The Stack (so far)
 This repository contains the following:
 - Seagull Socks JIT Market Program
 - Front End for interacting with the program
 - SDK for interacting with the program
-- Maker Bot (example) to demonstrate a working market
+- Market Maker Bot (example) to demonstrate a working market
 
 **Warning: All code is unaudited and subject to security vulnerabilities, use at your own risk.**
 
 ## What can be improved?
-Due to the lack of time, the Front End did not meet up to our initial expectations, it is functional, however it is not ready for release and is missing order management features which are built into the contract but not expressed well in the app.
+Due to the short time frame, the Front End did not meet up to our initial expectations. It is functional, but it is not ready for release. The Front End is missing order management features which are built into the contract but not expressed very well in the app.
 
-There are additionally some improvements that can be made to the smart contract in the way orders are iterated and stored which will be implemented eventually.
+There are some improvements that can be made to the smart contract in the way orders are iterated and stored which will be implemented eventually.
 
 ## Conclusion
-Thank you Lamport DAO and all the sponsors for enabling this kind of community event, truly inspiring enough to make me learn how to write smart contracts in a week and produce this. I do fully intend to bring this product to market in some way, shape, or form.
+Thank you Lamport DAO and all the sponsors for enabling this kind of community event. You have truly inspired me enough to make me learn how to write smart contracts in a week and produce this. I do fully intend to bring this product to market in some way, shape, or form.

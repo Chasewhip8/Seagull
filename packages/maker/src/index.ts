@@ -1,6 +1,6 @@
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { SeagullSocks } from "@seagullfinance/seagull/dist/provider";
-import { SEAGULL_PROGRAM_ID } from "@seagullfinance/seagull/dist/constants";
+import { ID_RESERVED_SIDE_BIT_U64, SEAGULL_PROGRAM_ID } from "@seagullfinance/seagull/dist/constants";
 import { config } from "./config";
 import { BN, BorshCoder, EventParser } from "@project-serum/anchor";
 import { IDL } from "@seagullfinance/seagull/dist/seagull_spot_v1";
@@ -13,12 +13,12 @@ import {
 import {
     findMarketAddress,
     findUserAddress,
-    findUserID, fp32FromNumber,
+    findUserID, fp32CalcMinTickSizes, fp32FromNumber,
     getSideFromKey,
     getUserIdFromKey
 } from "@seagullfinance/seagull/dist/utils";
 import * as anchor from "@project-serum/anchor";
-import { createWrappedNativeAccount } from "@solana/spl-token";
+import { createAssociatedTokenAccountIdempotent, createWrappedNativeAccount } from "@solana/spl-token";
 
 const connection = new Connection(clusterApiUrl("devnet"), { commitment: "confirmed" });
 const sdk = new SeagullSocks(connection, SEAGULL_PROGRAM_ID);
@@ -44,7 +44,9 @@ async function setupMarkets(){
             console.log("Market likely already exists!")
         }
 
-        market.market = await sdk.fetchMarket(findMarketAddress(market.baseMint, market.quoteMint));
+        const marketAddress = findMarketAddress(market.baseMint, market.quoteMint);
+        console.log("Market: " + marketAddress);
+        market.market = await sdk.fetchMarket(marketAddress);
 
         const userId = await findUserID(config.filler.publicKey);
         try {
@@ -73,6 +75,8 @@ async function fillOrder(marketAddress: PublicKey, orderId: BN, slot: number, aE
     }
 
     try {
+        console.log("id: " + orderId + " side: " + getSideFromKey(orderId));
+
         const sig = await sdk.sendTransaction(
             [config.filler],
             { commitment: "finalized", skipPreflight: true },
@@ -93,33 +97,46 @@ async function fillOrder(marketAddress: PublicKey, orderId: BN, slot: number, aE
             for (const eventObj of events){
                 if (eventObj.name == "OrderMatchedEvent"){
                     const event = eventObj as MarketEvent<OrderMatchedEvent>;
-                    if (event.data.orderId != orderId || event.data.market != marketAddress){
+                    if (!event.data.market.equals(marketAddress)){
+                        console.log("skipped match event: " + event.data.orderId + " , " + event.data.market);
                         continue;
                     }
 
-                    console.log("Waiting until slot: " + aEnd.toNumber() + " for orderId: " + orderId);
+                    const settleOrderId = event.data.orderId;
+
+                    console.log("Waiting until slot: " + aEnd.toNumber() + " for orderId: " + settleOrderId);
                     await waitUntilSlot(connection, aEnd.toNumber());
-                    console.log("Finished waiting until slot! orderId: " + orderId);
+                    console.log("Finished waiting until slot! orderId: " + settleOrderId);
+
+                    const user = await sdk.fetchUser(findUserAddress(event.data.market, getUserIdFromKey(settleOrderId)));
+
+                    await createAssociatedTokenAccountIdempotent(
+                        connection,
+                        config.filler,
+                        getSideFromKey(settleOrderId) == MarketSide.Buy ? market.baseMint : market.quoteMint,
+                        user.authority,
+                        { commitment: "confirmed" }
+                    );
 
                     const sig = await sdk.sendTransaction(
                         [config.filler],
                         { commitment: "finalized" },
                         sdk.settleOrder,
-                        orderId,
+                        settleOrderId,
                         market.market,
-                        market.filler,
-                        await sdk.fetchUser(findUserAddress(market.market?.publicKey, getUserIdFromKey(orderId)))
-                    )
+                        user,
+                        market.filler
+                    );
 
-                    const log = await anchor.getProvider().connection.getTransaction(sig, { commitment: "confirmed" });
+                    const log = await connection.getTransaction(sig, { commitment: "confirmed" });
                     const logs = log?.meta?.logMessages;
                     if (logs) {
                         const events = eventParser.parseLogs(logs);
                         for (const eventObj of events) {
                             if (eventObj.name == "OrderSettledEvent") {
                                 const event = eventObj as MarketEvent<OrderSettledEvent>;
-                                if (event.data.orderId == orderId && event.data.market == market.market.publicKey){
-                                    console.log("Settled Order: " + orderId + " on market " + event.data.market.toBase58());
+                                if (event.data.orderId == settleOrderId && event.data.market == market.market.publicKey){
+                                    console.log("Settled Order: " + settleOrderId + " on market " + event.data.market.toBase58());
                                 }
                             }
                         }
@@ -196,10 +213,4 @@ export const computeUiPrice = (fp32Price: BN) => {
     return Number(divideBnToNumber(numerator, denominator).toPrecision(5));
 };
 
-// async function maker(){
-//     const x = new BN(4076863488);
-//
-//     console.log(computeUiPrice(x));
-// }
-
-maker().then(() => console.log("Done."))
+maker().then(() => console.log("Done."));

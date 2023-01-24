@@ -1,12 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_lang::solana_program::program::{invoke_signed};
+use anchor_lang::solana_program::program::invoke_signed;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
-use sokoban::{Critbit, ZeroCopy};
 
-use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, Side, User};
+use sokoban::{ZeroCopy};
+
 use crate::gen_market_signer_seeds;
+use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueType, Side, User};
 use crate::pda::Side::{Buy, Sell};
 
 #[derive(Accounts)]
@@ -66,7 +67,7 @@ impl<'info> ClaimUnsettled<'info> {
 
     pub fn handle(&mut self) -> Result<()> {
         let buf = &self.order_queue.load_mut()?.queue;
-        let order_queue: &OrderQueueCritbit = Critbit::load_bytes(buf).unwrap();
+        let order_queue: &OrderQueueType = OrderQueueType::load_bytes(buf).unwrap();
 
         let mut outstanding_quote = 0;
         let mut outstanding_base = 0;

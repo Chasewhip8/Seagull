@@ -1,6 +1,6 @@
 import { Config } from "./types";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { fp32FromNumber } from "@seagullfinance/seagull/dist/utils";
+import { fp32CalcMinTickSizes, fp32FromNumber, tickAlignFloor } from "@seagullfinance/seagull/dist/utils";
 import { BN } from "@project-serum/anchor";
 
 export let config: Config = {
@@ -9,11 +9,11 @@ export let config: Config = {
     markets: [
         {
             baseMint: new PublicKey("bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1"),
-            quoteMint: new PublicKey("So11111111111111111111111111111111111111112"),
+            quoteMint: new PublicKey("8DtFnmrRbasf5Asp8AbZXPw3Fyh41t76GLBiWYFc9yz9"),
             market: null,
             filler: null
         }
     ],
-    fillPrice: fp32FromNumber(1),
+    fillPrice: tickAlignFloor(fp32FromNumber(0.02), fp32CalcMinTickSizes(9)),
     fillSize: new BN(10 ** 9) // 1 of a 9 decimal spl token
 }

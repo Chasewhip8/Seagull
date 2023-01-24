@@ -1,11 +1,12 @@
 use std::mem;
+
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock::Slot;
 use bytemuck::{Pod, Zeroable};
 
-use sokoban::Critbit;
+use sokoban::RedBlackTree;
 
-use crate::constants::{CRITBIT_NUM_NODES, ID_RESERVED_SIDE_BIT, MAX_ORDERS, NULL_FILLER};
+use crate::constants::{ID_RESERVED_SIDE_BIT, ID_RESERVED_SIDE_BIT_U64, MAX_ORDERS, NULL_FILLER};
 use crate::pda::Side::{Buy, Sell};
 
 #[account]
@@ -17,7 +18,7 @@ pub struct Market {
     pub base_mint: Pubkey,
     pub base_holding_account: Pubkey,
 
-    pub order_queue: Pubkey, // Pubkey of CritBit order queue
+    pub order_queue: Pubkey, // Pubkey of order queue
     pub min_tick_size: u64, // FP32 of quote.
 
     pub bump: u8
@@ -55,17 +56,17 @@ macro_rules! gen_market_signer_seeds {
 #[repr(packed)]
 pub struct OrderQueue {
     pub sequential_index: u64,
-    pub queue: [u8; 5424]
+    pub queue: [u8; 10152]
 }
 
 impl OrderQueue {
-    pub const LEN: usize = mem::size_of::<OrderQueueCritbit>() + 8;
+    pub const LEN: usize = mem::size_of::<OrderQueueType>() + 8;
 
     // Workaround for Anchor Bug preventing us from putting the LEN inside of the array causing idl type parse errors.
     const _LEN_CHECK: [u8; OrderQueue::LEN] = [0; mem::size_of::<OrderQueue>()];
 }
 
-pub type OrderQueueCritbit = Critbit<OrderInfo, CRITBIT_NUM_NODES, MAX_ORDERS>;
+pub type OrderQueueType = RedBlackTree<u128, OrderInfo, MAX_ORDERS>;
 
 #[derive(Copy, Clone, Default)]
 #[repr(packed)]
@@ -112,7 +113,7 @@ impl OrderInfo {
     }
 
     pub fn get_user_id_from_key(key: u128) -> u64 {
-        (key >> 64) as u64
+        (key >> 64) as u64 & !ID_RESERVED_SIDE_BIT_U64
     }
 
     pub fn get_side_from_key(key: u128) -> Side {

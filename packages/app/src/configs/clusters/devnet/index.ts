@@ -22,14 +22,22 @@ const DEVNET: ClusterConfig = {
       extraInfo: "Native Currency of Solana",
       mint: "So11111111111111111111111111111111111111112", // wSOL mint
       decimals: 9
+    },
+    {
+      name: "Test",
+      symbol: "TEST",
+      tokenIcon: ICON_SOL,
+      extraInfo: "Native Currency of Testing",
+      mint: "8DtFnmrRbasf5Asp8AbZXPw3Fyh41t76GLBiWYFc9yz9",
+      decimals: 9
     }
   ],
   markets: [
     {
-      name: "bSOL/SOL",
+      name: "bSOL/TEST",
       description: "Liquid Unstake Market",
       image: ICON_B_SOL,
-      address: "6o3wPDXRyvSgsvmyTs43cfusuWLH5uGjEcPDtqfQG8QG"
+      address: "DURFmkAW8HJcDG23PF4aDZ89isSfVvXx1ErsNS6Y7Fow"
     },
     {
       name: "mSOL/SOL",

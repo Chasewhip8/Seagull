@@ -3,12 +3,13 @@ use anchor_lang::solana_program::entrypoint::ProgramResult;
 use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::token::spl_token::instruction::transfer_checked;
-use sokoban::{Critbit, NodeAllocatorMap, ZeroCopy};
-use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T, BACKSTOP_LENGTH, MAX_ORDERS};
 
-use crate::events::{OrderPlaceEvent, OrderCancelEvent};
-use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueCritbit, User};
+use sokoban::{NodeAllocatorMap, ZeroCopy};
+
+use crate::constants::{AUCTION_MAX_T, AUCTION_MIN_T, BACKSTOP_LENGTH, MAX_ORDERS};
 use crate::error::SeagullError;
+use crate::events::{OrderCancelEvent, OrderPlaceEvent};
+use crate::pda::{Market, OrderInfo, OrderQueue, OrderQueueType, User};
 use crate::pda::market::Side;
 
 #[derive(Accounts)]
@@ -80,7 +81,7 @@ impl<'info> PlaceOrder<'info> {
         order_queue_account.sequential_index = order_queue_account.sequential_index.checked_add(1).unwrap();
 
         let buf = &mut order_queue_account.queue;
-        let order_queue: &mut OrderQueueCritbit = Critbit::load_mut_bytes(buf).unwrap();
+        let order_queue: &mut OrderQueueType = OrderQueueType::load_mut_bytes(buf).unwrap();
 
         if order_queue.len() == MAX_ORDERS {
             let mut order_key: Option<u128> = None;
