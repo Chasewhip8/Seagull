@@ -4,7 +4,7 @@ import { ClusterConfig, NotificationType } from "../models/types";
 import { selectClusterConfig } from "../stores/reducers/configReducer";
 import { WrappedImage } from "./common/WrappedImage";
 import { useAppDispatch, useAppSelector } from "../hooks/common";
-import { PLACEHOLDER } from "../utils/images";
+import { ICON_CANCEL, ICON_CHECK_CIRCLE, ICON_EXCLAMATION, ICON_INFO, PLACEHOLDER } from "../utils/images";
 
 const NotificationList = () => {
     const notifications = useAppSelector(selectNotifications);
@@ -60,10 +60,10 @@ const Notification = ({ type, message, description, txId, timeout, cluster, onHi
                 <div className={`flex items-center`}>
                     <div className={`flex-shrink-0`}>
                         {type == 'success' ? (
-                            <WrappedImage src={PLACEHOLDER} height={32} width={32} alt={""}/>
+                            <WrappedImage src={ICON_CHECK_CIRCLE} height={32} width={32} alt={""}/>
                         ) : null}
-                        {type === 'info' && <WrappedImage src={PLACEHOLDER} height={32} width={32} alt={""}/>}
-                        {type === 'error' && <WrappedImage src={PLACEHOLDER} height={32} width={32} alt={""}/>}
+                        {type === 'info' && <WrappedImage src={ICON_INFO} height={32} width={32} alt={""}/>}
+                        {type === 'error' && <WrappedImage src={ICON_EXCLAMATION} height={32} width={32} alt={""}/>}
                     </div>
                     <div className={`ml-2 w-0 flex-1`}>
                         <div className={`font-bold text-fgd-1`}>{message}</div>
@@ -98,7 +98,7 @@ const Notification = ({ type, message, description, txId, timeout, cluster, onHi
                             className={`bg-bkg-2 default-transition rounded-md inline-flex text-fgd-3 hover:text-fgd-4 focus:outline-none`}
                         >
                             <span className={`sr-only`}>Close</span>
-                            <WrappedImage src={PLACEHOLDER} height={20} width={20} alt={""}/>
+                            <WrappedImage src={ICON_CANCEL} height={20} width={20} alt={""}/>
                         </button>
                     </div>
                 </div>
