@@ -23,13 +23,6 @@ Since Solana's unstake mechanism is deterministic and revolves around the epoch 
 ### Bonk
 Bonk is strapped with Perpetual Futures markets on centralized and decentralized exchanges. Using the same logic, as above in Tighter On-Chain Spreads, Seagull can provide better spreads for orders and potentially burn accrued fees.
 
-## The Stack (so far)
-This repository contains the following:
-- Seagull Socks JIT Market Program
-- Front End for interacting with the program
-- SDK for interacting with the program
-- Market Maker Bot (example) to demonstrate a working market
-
 **Warning: All code is unaudited and subject to security vulnerabilities, use at your own risk.**
 
 ## What can be improved?
@@ -37,5 +30,12 @@ Due to the short time frame, the Front End did not meet up to our initial expect
 
 There are some improvements that can be made to the smart contract in the way orders are iterated and stored which will be implemented eventually.
 
+## The Stack (so far)
+This repository contains the following:
+- Seagull Socks JIT Market Program
+- Front End for interacting with the program
+- SDK for interacting with the program
+- Market Maker Bot (example) to demonstrate a working market
+
 ## Conclusion
-Thank you Lamport DAO and all the sponsors for enabling this kind of community event. You have truly inspired me enough to make me learn how to write smart contracts in a week and produce this. I do fully intend to bring this product to market in some way, shape, or form.
+Thank you Lamport DAO and all the sponsors for enabling this kind of community event. This product was made in the timespan of the hackathon and I do fully intend to bring this product to market in some way, shape, or form.
